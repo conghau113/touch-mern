@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`purchasing flow > toUpperCase 1`] = `"FOOBAR"`;
+
+exports[`purchasing flow > toUpperCase 1 1`] = `"\\"FOOBAR\\""`;
+
+exports[`purchasing flow > toUpperCase testing 1`] = `"TESTING NE"`;
