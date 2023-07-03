@@ -1,11 +1,19 @@
-import { Button } from 'antd';
+import HomePage from '../features/homePage';
+import LoginPage from '../features/loginPage';
+import ProfilePage from '../features/profilePage';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 
 function App() {
   return (
-    <>
-      <p className='bg-red-600 text-white'>Click on the Vite and React logos to learn more</p>
-      <Button type='primary'>button ne</Button>
-    </>
+    <div className='h-full w-full'>
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={<LoginPage />} />
+          <Route path='/home' element={<HomePage />} />
+          <Route path='/profile/:userId' element={<ProfilePage />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 }
 
