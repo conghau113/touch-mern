@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('./libs/antd/backgrooundBlur.scss');
+
 @layer base {
   @font-face {
     font-family: 'Inter';
@@ -70,3 +72,8 @@
 * {
   @apply font-inter;
 }
+// body {
+//   background-image: url('./assets/wallpaper-background.jpg');
+//   object-fit: cover;
+//   background-size: cover;
+// }

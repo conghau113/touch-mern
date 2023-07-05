@@ -32,7 +32,7 @@ export const colorTokens = {
 
 const theme: ThemeConfig = {
   token: {
-    colorPrimary: '#341AD2',
+    colorPrimary: '#172554',
   },
   components: {
     Typography: {},

@@ -169,10 +169,10 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
                     className={`flex flex-col ${isUploadImage ? 'items-center' : 'items-start'} justify-center`}
                   >
                     <Title className='text-black m-0 text-base font-semibold'>
-                      Nhấp hoặc kéo tệp vào đây để tải lên (không bắt buộc)
+                      Nhấp hoặc kéo tệp vào đây để tải lên
                     </Title>
                     <Text className={`text-black my-1.5 text-xs font-normal opacity-60`}>
-                      Chỉ được tải lên 1 file với các định dạng: .docx hoặc .png, .jpg
+                      Chỉ được tải lên 1 file với các định dạng: .jpeg hoặc .png, .jpg
                     </Text>
                   </Typography>
                 </>
