@@ -16,22 +16,21 @@ import PrimaryButton from '../../components/custom/button/PrimaryButton';
 import PrimaryInput from '../../components/custom/input/PrimaryInput';
 import PrimarySelect from '../../components/custom/select/PrimarySelect';
 import { setLogout } from '../../state';
+import { RootState } from '../../state/store';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
 const Navbar = () => {
-  const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
+  const [isMobileMenuToggled, setIsMobileMenuToggled] = useState<boolean>(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user: any = useSelector<any>((state) => state.user);
-  // console.log('user::', user);
+  const user: any = useSelector<RootState>((state) => state.user);
 
   const isNonMobileScreens = useMediaQuery() !== 'xs';
-  console.log('isNonMobileScreens::', isNonMobileScreens);
-  const fullName = `${user?.firstName} ${user?.lastName}`;
+  const fullName = `${user?.lastName} ${user?.firstName}`;
 
   return (
-    <div className='flex items-center justify-between w-full'>
+    <div className='flex items-center justify-between w-full bg-blue-100 shadow-sm'>
       <div className='flex items-center justify-around w-1/2'>
         <Typography
           className='font-bold text-[40px] text-center cursor-pointer hover:opacity-80 w-4/12'
@@ -57,9 +56,9 @@ const Navbar = () => {
             )}
           </PrimaryButton> */}
           <div className='flex items-center opacity-90'>
-            <MessageFilled className='text-lg cursor-pointer px-3' />
-            <BellFilled className='text-lg cursor-pointer px-3' />
-            <QuestionCircleFilled className='text-lg cursor-pointer px-3' />
+            <MessageFilled className='text-lg cursor-pointer px-3 hover:opacity-70' />
+            <BellFilled className='text-lg cursor-pointer px-3 hover:opacity-70' />
+            <QuestionCircleFilled className='text-lg cursor-pointer px-3 hover:opacity-70' />
           </div>
 
           <Dropdown
@@ -73,7 +72,11 @@ const Navbar = () => {
                       label: <span>Trang cá nhân</span>,
                     },
                     {
-                      label: <span onClick={() => dispatch(setLogout())}>Log out</span>,
+                      label: (
+                        <Typography className='text-red-500 hover:text-white' onClick={() => dispatch(setLogout())}>
+                          Log out
+                        </Typography>
+                      ),
                       danger: true,
                     },
                   ] as MenuItem[]

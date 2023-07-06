@@ -104,6 +104,12 @@ const LoginAndRegisterForm = () => {
       body: JSON.stringify(values),
     });
     const loggedIn = await loggedInResponse.json();
+    const { status } = loggedInResponse ?? {};
+    if (status !== 200) {
+      message.error('Email or password is incorrect!');
+    } else {
+      message.success('Login successful!');
+    }
     if (loggedIn) {
       dispatch(
         setLogin({

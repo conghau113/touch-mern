@@ -12,18 +12,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
 import theme from './libs/antd/Theme';
-
-const persistConfig = { key: 'root', storage, version: 1 };
-const persistedReducer = persistReducer(persistConfig, authReducer);
-const store = configureStore({
-  reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-      },
-    }),
-});
+import { store } from './state/store';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
