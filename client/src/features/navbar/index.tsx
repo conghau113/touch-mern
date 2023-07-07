@@ -24,7 +24,7 @@ const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState<boolean>(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user: any = useSelector<RootState>((state) => state.user);
+  const user = useSelector((state: RootState) => state.user);
 
   const isNonMobileScreens = useMediaQuery() !== 'xs';
   const fullName = `${user?.lastName} ${user?.firstName}`;
@@ -39,7 +39,7 @@ const Navbar = () => {
           TOUCH!
         </Typography>
         {isNonMobileScreens && (
-          <div className='bg-white rounded-lg flex items-center justify-between gap-3 py-1 px-4 w-8/12'>
+          <div className='rounded-lg flex items-center justify-between gap-3 py-1 px-4 w-8/12'>
             <PrimaryInput placeholder='Search...' />
           </div>
         )}

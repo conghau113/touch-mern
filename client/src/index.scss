@@ -65,13 +65,14 @@
   }
 
   body {
-    @apply font-inter;
+    @apply font-inter bg-gray-100;
   }
 }
 
 * {
   @apply font-inter;
 }
+
 // body {
 //   background-image: url('./assets/wallpaper-background.jpg');
 //   object-fit: cover;

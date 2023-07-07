@@ -110,6 +110,7 @@ const LoginAndRegisterForm = () => {
     } else {
       message.success('Login successful!');
     }
+    console.log('loggedIn::', loggedIn);
     if (loggedIn) {
       dispatch(
         setLogin({
