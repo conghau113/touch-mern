@@ -1,20 +1,67 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import HomePage from '../features/homePage';
 import LoginPage from '../features/loginPage';
+import MessengerPage from '../features/messengerPage';
+import PostPage from '../features/postPage';
 import ProfilePage from '../features/profilePage';
-import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../state/store';
+import SearchPage from '../features/searchPage';
+import PrivateRoute from '../route/PrivateRoute';
 
 function App() {
-  const isAuth = Boolean(useSelector((state: RootState) => state.token));
-
   return (
     <div className='h-full w-full app'>
       <BrowserRouter>
         <Routes>
-          <Route path='/' element={<LoginPage />} />
-          <Route path='/home' element={isAuth ? <HomePage /> : <Navigate to={'/'} />} />
-          <Route path='/profile/:userId' element={isAuth ? <ProfilePage /> : <Navigate to={'/'} />} />
+          <Route
+            path='/'
+            element={
+              <PrivateRoute>
+                <HomePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/posts/:id'
+            element={
+              <PrivateRoute>
+                <PostPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/posts/create'
+            element={
+              <PrivateRoute>
+                <PostPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/messenger'
+            element={
+              <PrivateRoute>
+                <MessengerPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/search'
+            element={
+              <PrivateRoute>
+                <SearchPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/users/:id'
+            element={
+              <PrivateRoute>
+                <ProfilePage />
+              </PrivateRoute>
+            }
+          />
+          <Route path='/login' element={<LoginPage />} />
+          <Route path='/signup' element={<LoginPage />} />
         </Routes>
       </BrowserRouter>
     </div>

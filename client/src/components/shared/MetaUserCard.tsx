@@ -14,7 +14,6 @@ interface MetaUserCardProps {
 
 export default function MetaUserCard(props: MetaUserCardProps) {
   const { fullName, friends, picturePath, userIcon } = props ?? {};
-  console.log('fullName::', fullName);
 
   switch (userIcon) {
     case EUserIcon.Setting:

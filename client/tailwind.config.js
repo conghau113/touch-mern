@@ -13,6 +13,12 @@ const colors = {
     8: '#888',
     9: '#999',
   },
+  main: {
+    purple: '#36174D',
+    pink: '#FF4778',
+    light: '#F3EFFE',
+    blue: '#DEACF5',
+  },
   black: {
     1: '#000000',
     2: '#242424',

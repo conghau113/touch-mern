@@ -1,69 +1,48 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import multer from 'multer';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import path from 'path';
-import mongoose from 'mongoose';
-import { fileURLToPath } from 'url';
-import authRoutes from './routes/auth.js';
-import userRoutes from './routes/users.js';
-import postRoutes from './routes/posts.js';
-import { register } from './controllers/auth.js';
-import { createPost } from './controllers/posts.js';
-import { verifyToken } from './middleware/auth.js';
-import User from './models/User.js';
-import Post from './models/Post.js';
-import { users, posts } from './data/index.js';
-
-// configurations
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config();
+const express = require('express');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const path = require('path');
 const app = express();
-app.use(express.json());
-app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({ helmet: 'cross-origin' }));
-app.use(morgan('common'));
-app.use(bodyParser.json({ limit: '30mb', extends: true }));
-app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }));
-app.use(cors());
-app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
+const { authSocket, socketServer } = require('./socketServer');
+const posts = require('./routes/postsRoute');
+const users = require('./routes/usersRoute');
+const comments = require('./routes/commentsRoute');
+const messages = require('./routes/messagesRoute');
+const PostLike = require('./models/PostLike');
+const Post = require('./models/PostModel');
 
-/* FILE STORAGE */
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/assets');
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
+dotenv.config();
+
+const httpServer = require('http').createServer(app);
+// const io = require('socket.io')(httpServer, {
+//   cors: {
+//     origin: ['http://localhost:3000', 'https://post-it-heroku.herokuapp.com'],
+//   },
+// });
+
+// io.use(authSocket);
+// io.on('connection', (socket) => socketServer(socket));
+
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true }, () => {
+  console.log('MongoDB connected');
 });
-const upload = multer({ storage });
 
-// route files
-app.post('/auth/register', upload.single('picture'), register);
-app.post('/posts', verifyToken, upload.single('picture'), createPost);
+httpServer.listen(process.env.PORT || 4000, () => {
+  console.log(`Listening at port ${process.env.PORT || 4000}`);
+});
 
-/* ROUTES */
-app.use('/auth', authRoutes);
-app.use('/users', userRoutes);
-app.use('/posts', postRoutes);
+app.use(express.json());
+app.use(cors());
+app.use('/api/posts', posts);
+app.use('/api/users', users);
+app.use('/api/comments', comments);
+app.use('/api/messages', messages);
 
-// mongoose setup
-const PORT = process.env.PORT || 6001;
-mongoose
-  .connect(process.env.MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+// if (process.env.NODE_ENV == "production") {
+//   app.use(express.static(path.join(__dirname, "/client/build")));
 
-    /* ADD DATA ONE TIME */
-    // User.insertMany(users);
-    // Post.insertMany(posts);
-  })
-  .catch((error) => console.log(`${error} did not connect`));
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.join(__dirname, "client/build", "index.html"));
+//   });
+// }

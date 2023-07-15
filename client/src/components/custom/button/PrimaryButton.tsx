@@ -198,7 +198,11 @@ export default React.forwardRef(function PrimaryButton(
     }
     case 'primary': {
       return (
-        <Button ref={ref} className={tw('w-full border-none bg-blue-2 hover:opacity-80', className)} {...restProps}>
+        <Button
+          ref={ref}
+          className={tw('w-full border-none bg-main-purple hover:opacity-80', className)}
+          {...restProps}
+        >
           <Typography className={tw('flex h-full items-center justify-center', typographyClassName)}>
             <Text className={tw('text-base font-medium text-white', textClassName)}>{children}</Text>
           </Typography>

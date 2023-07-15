@@ -1,53 +1,77 @@
-import {
-  BellFilled,
-  CaretDownOutlined,
-  CloseCircleFilled,
-  MessageFilled,
-  QuestionCircleFilled,
-} from '@ant-design/icons';
-import { Dropdown, Menu, MenuProps, Space, Typography } from 'antd';
+import { BellFilled, CloseCircleFilled, MessageFilled, QuestionCircleFilled, WechatFilled } from '@ant-design/icons';
+import { Dropdown, Image, Menu, MenuProps, Space, Typography } from 'antd';
 import MenuItem from 'antd/es/menu/MenuItem';
 import _ from 'lodash';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from 'use-media-antd-query';
+import logo from '../../assets/logo_touch.png';
 import PrimaryButton from '../../components/custom/button/PrimaryButton';
 import PrimaryInput from '../../components/custom/input/PrimaryInput';
 import PrimarySelect from '../../components/custom/select/PrimarySelect';
-import { setLogout } from '../../state';
-import { RootState } from '../../state/store';
+import SharedAvatarAuthUser from '../../components/shared/SharedAvatar';
+import { isLoggedIn, logoutUser } from '../../helper/authhelper';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState<boolean>(false);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state: RootState) => state.user);
+  const user = isLoggedIn();
+  const username = user && isLoggedIn().username;
+  const [search, setSearch] = useState('');
+  const [searchOpacity, setSearchOpacity] = useState('opacity-80');
 
   const isNonMobileScreens = useMediaQuery() !== 'xs';
-  const fullName = `${user?.lastName} ${user?.firstName}`;
+
+  const handleSubmit = (e: any) => {
+    if (_.size(e.target.value)) {
+      navigate('/search?' + new URLSearchParams({ search }));
+    }
+  };
+
+  const handleLogout = async () => {
+    logoutUser();
+    navigate('/login');
+  };
 
   return (
-    <div className='flex items-center justify-between w-full bg-blue-100 shadow-sm'>
-      <div className='flex items-center justify-around w-1/2'>
+    <div className='flex items-center justify-between w-full bg-main-purple shadow-md fixed z-50'>
+      <Space className='flex w-4/12 items-center justify-center'>
+        <div
+          onClick={() => navigate('/')}
+          className='flex items-center cursor-pointer justify-center h-10 w-10 rounded-full bg-main-light'
+        >
+          <Image preview={false} width={30} src={logo} />
+        </div>
         <Typography
-          className='font-bold text-[40px] text-center cursor-pointer hover:opacity-80 w-4/12'
-          onClick={() => navigate('/home')}
+          onClick={() => navigate('/')}
+          className='font-bold text-[40px] text-main-light  text-center cursor-pointer'
         >
           TOUCH!
         </Typography>
-        {isNonMobileScreens && (
-          <div className='rounded-lg flex items-center justify-between gap-3 py-1 px-4 w-8/12'>
-            <PrimaryInput placeholder='Search...' />
-          </div>
-        )}
-      </div>
+      </Space>
+      {isNonMobileScreens && (
+        <div className='rounded-lg flex items-center justify-between gap-3 py-1 px-4 w-5/12'>
+          <PrimaryInput
+            className={`rounded-full h-10 bg-main-light ${searchOpacity}`}
+            variant='search-prefix'
+            value={search}
+            allowClear
+            // onFocus={() => setSearchOpacity('opacity-unset')}
+            // onBlur={() => setSearchOpacity('opacity-80')}
+            onSubmit={handleSubmit}
+            onPressEnter={handleSubmit}
+            onClickSearchIcon={(e) => handleSubmit?.(e)}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder='Search...'
+          />
+        </div>
+      )}
 
       {/* DESKTOP NAV */}
       {isNonMobileScreens ? (
-        <div className='flex gap-12 justify-end items-center w-1/2 mr-12'>
+        <div className='flex gap-12 justify-end items-center w-4/12'>
           {/* <PrimaryButton onClick={() => dispatch(setMode())}>
             {theme.palette.mode === "dark" ? (
               <DarkMode sx={{ fontSize: "25px" }} />
@@ -55,25 +79,26 @@ const Navbar = () => {
               <LightMode sx={{ color: dark, fontSize: "25px" }} />
             )}
           </PrimaryButton> */}
-          <div className='flex items-center opacity-90'>
-            <MessageFilled className='text-lg cursor-pointer px-3 hover:opacity-70' />
-            <BellFilled className='text-lg cursor-pointer px-3 hover:opacity-70' />
-            <QuestionCircleFilled className='text-lg cursor-pointer px-3 hover:opacity-70' />
+          <div className='flex items-center opacity-90 gap-2'>
+            <WechatFilled className='text-xl shadow-lg text-main-light cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
+            <BellFilled className='text-lg shadow-lg text-main-light cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
+            <QuestionCircleFilled className='text-lg shadow-lg text-main-light cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
           </div>
 
           <Dropdown
-            className='cursor-pointer'
+            className='cursor-pointer mr-12'
             placement='bottomRight'
+            arrow
             overlay={
               <Menu
                 items={
                   [
                     {
-                      label: <span>Trang cá nhân</span>,
+                      label: <span onClick={() => navigate(`/users/${username}`)}>Trang cá nhân</span>,
                     },
                     {
                       label: (
-                        <Typography className='text-red-500 hover:text-white' onClick={() => dispatch(setLogout())}>
+                        <Typography className='text-red-500 hover:text-white' onClick={handleLogout}>
                           Log out
                         </Typography>
                       ),
@@ -84,12 +109,12 @@ const Navbar = () => {
               />
             }
           >
-            <a onClick={(e) => e.preventDefault()}>
-              <Space>
-                <Typography.Text strong>{_.size(user) ? fullName : 'Fake Name'}</Typography.Text>
-                <CaretDownOutlined />
-              </Space>
-            </a>
+            <Space onClick={() => navigate(`/users/${username}`)}>
+              <Typography.Text className='text-main-light text-bold'>
+                {_.size(username) ? `${username}` : 'no user'}
+              </Typography.Text>
+              <SharedAvatarAuthUser />
+            </Space>
           </Dropdown>
         </div>
       ) : (
@@ -110,21 +135,14 @@ const Navbar = () => {
 
           {/* MENU ITEMS */}
           <div className='flex flex-col justify-center items-center gap-3'>
-            {/* <IconButton onClick={() => dispatch(setMode())} sx={{ fontSize: '25px' }}>
-              {theme.palette.mode === 'dark' ? (
-                <DarkMode sx={{ fontSize: '25px' }} />
-              ) : (
-                <LightMode sx={{ color: dark, fontSize: '25px' }} />
-              )}
-            </IconButton> */}
             <MessageFilled />
             <BellFilled />
             <QuestionCircleFilled />
             <PrimarySelect>
               <MenuItem>
-                <Typography>{_.size(user) ? fullName : 'fake name'}</Typography>
+                <Typography>{_.size(username) ? `${username}` : 'fake name'}</Typography>
               </MenuItem>
-              <MenuItem onClick={() => dispatch(setLogout())}>Log Out</MenuItem>
+              <MenuItem onClick={handleLogout}>Log Out</MenuItem>
             </PrimarySelect>
           </div>
         </div>

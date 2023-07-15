@@ -1,21 +1,40 @@
-import jwt from 'jsonwebtoken';
+const jwt = require("jsonwebtoken");
 
-export const verifyToken = async (req, res, next) => {
+const verifyToken = (req, res, next) => {
   try {
-    let token = req.header('Authorization');
+    const token = req.headers["x-access-token"];
 
     if (!token) {
-      return res.status(403).send('Access Denied');
+      throw new Error("No token provided");
     }
 
-    if (token.startsWith('Bearer ')) {
-      token = token.slice(7, token.length).trimLeft();
-    }
+    const { userId, isAdmin } = jwt.verify(token, process.env.TOKEN_KEY);
 
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
-    next();
+    req.body = {
+      ...req.body,
+      userId,
+      isAdmin,
+    };
+
+    return next();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(400).json({ error: err.message });
   }
 };
+
+const optionallyVerifyToken = (req, res, next) => {
+  try {
+    const token = req.headers["x-access-token"];
+
+    if (!token) return next();
+
+    const decoded = jwt.verify(token, process.env.TOKEN_KEY);
+    req.body.userId = decoded.userId;
+
+    next();
+  } catch (err) {
+    return next();
+  }
+};
+
+module.exports = { verifyToken, optionallyVerifyToken };

@@ -1,4 +1,4 @@
-import useModalStore from '@/hooks/useModalStore';
+import useModalStore from '../../../state/useModalStore';
 import { tw } from '../../../utils/classUtil';
 import PrimaryModal, { type PrimaryModalProps } from './PrimaryModal';
 

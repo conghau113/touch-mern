@@ -1,140 +1,109 @@
-import { EyeInvisibleOutlined, EyeTwoTone, InboxOutlined } from '@ant-design/icons';
-import { Col, Divider, Form, Input, message, Row, Typography, UploadProps } from 'antd';
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import { Col, Divider, Form, Input, message, Row, Typography } from 'antd';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { login, signup } from '../../../apis/service/users';
 import PrimaryButton from '../../../components/custom/button/PrimaryButton';
-import PrimaryDragger from '../../../components/custom/dragger/PrimaryDragger';
 import PrimaryForm from '../../../components/custom/form/PrimaryForm';
 import PrimaryInput from '../../../components/custom/input/PrimaryInput';
+import { loginUser } from '../../../helper/authhelper';
 import { setLogin } from '../../../state';
-import { isAcceptanceFile, isAcceptanceFileQuestion } from '../../../utils/fileUtil';
 import { ELoginEnum } from '../enums/LoginEnum';
+import useAuthStore from '../store/useAuthStore';
 
 const LoginAndRegisterForm = () => {
   const [form] = Form.useForm();
   const [pageType, setPageType] = useState<ELoginEnum>(ELoginEnum.Login);
-  const [droppedFileName, setDroppedFileName] = useState<string>('');
-  const [droppedFileSize, setDroppedFileSize] = useState<string>('');
-  const [status, setStatus] = useState<string>('normal');
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const isLogin = _.includes(ELoginEnum.Login, pageType);
   const isRegister = _.includes(ELoginEnum.Register, pageType);
 
+  const { setUserAuth } = useAuthStore();
+
   // xu ly keo tha file
-  const handleDrop: UploadProps['onDrop'] = (e: any) => {
-    const { name } = e.dataTransfer.files[0];
-    setDroppedFileName(name);
-  };
+  // const handleDrop: UploadProps['onDrop'] = (e: any) => {
+  //   const { name } = e.dataTransfer.files[0];
+  //   setDroppedFileName(name);
+  // };
 
-  // format kieu du lieu file khi upload
-  function formatBytes(bytes: number, decimals = 2) {
-    return `${(bytes / 1024 / 1024).toFixed(decimals)} MB`;
-  }
+  // // format kieu du lieu file khi upload
+  // function formatBytes(bytes: number, decimals = 2) {
+  //   return `${(bytes / 1024 / 1024).toFixed(decimals)} MB`;
+  // }
 
-  // xu ly onChange file
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    const file = newFileList?.[0];
-    const { size = 0, name } = file;
-    setDroppedFileName(name);
-    setDroppedFileSize(formatBytes(size));
-    if (size && size > 20 * 1024 * 1024) {
-      setStatus('error');
-      // message.error('Dung lượng file không được quá 20MB');
-      return false;
-    }
-    if (name && !isAcceptanceFile(name)) {
-      setStatus('error');
-      // message.error(`Đính kèm không hợp lệ. Chỉ chập nhận định dạng ${_.join(['jpg', 'jpeg', 'png'], ', ')}`);
-      return false;
+  // // xu ly onChange file
+  // const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+  //   const file = newFileList?.[0];
+  //   const { size = 0, name } = file;
+  //   setDroppedFileName(name);
+  //   setDroppedFileSize(formatBytes(size));
+  //   if (size && size > 20 * 1024 * 1024) {
+  //     setStatus('error');
+  //     // message.error('Dung lượng file không được quá 20MB');
+  //     return false;
+  //   }
+  //   if (name && !isAcceptanceFile(name)) {
+  //     setStatus('error');
+  //     // message.error(`Đính kèm không hợp lệ. Chỉ chập nhận định dạng ${_.join(['jpg', 'jpeg', 'png'], ', ')}`);
+  //     return false;
+  //   } else {
+  //     setStatus('done');
+  //   }
+  // };
+
+  // // xu ly uploadfile props
+  // const uploadProps: UploadProps = {
+  //   multiple: false,
+  //   onChange: handleChange,
+  //   onDrop: handleDrop,
+  //   beforeUpload: (file) => {
+  //     if (file.size && file.size > 20 * 1024 * 1024) {
+  //       // message.error('Dung lượng file không được quá 20MB');
+  //       return false;
+  //     }
+  //     if (file.name && !isAcceptanceFile(file.name)) {
+  //       // message.error('File không hợp lệ');
+  //       return false;
+  //     }
+  //     return false;
+  //   },
+  // };
+
+  const handleRegister = async (values: any) => {
+    const data = await signup(values);
+    if (data.error) {
+      message.error(data.error);
     } else {
-      setStatus('done');
-    }
-  };
-
-  // xu ly uploadfile props
-  const uploadProps: UploadProps = {
-    multiple: false,
-    onChange: handleChange,
-    onDrop: handleDrop,
-    beforeUpload: (file) => {
-      if (file.size && file.size > 20 * 1024 * 1024) {
-        // message.error('Dung lượng file không được quá 20MB');
-        return false;
-      }
-      if (file.name && !isAcceptanceFile(file.name)) {
-        // message.error('File không hợp lệ');
-        return false;
-      }
-      return false;
-    },
-  };
-
-  const register = async (values: any) => {
-    // this allows us to send form info with image
-    const formData = new FormData();
-    const { picture } = values ?? {};
-    for (const item in values) {
-      if (!_.isNil(values[item])) {
-        formData.append(`${item}`, values[item]);
-      }
-    }
-    formData.append('picturePath', picture?.file?.name);
-
-    const savedUserResponse = await fetch('http://localhost:3001/auth/register', {
-      method: 'POST',
-      body: formData,
-    });
-    const savedUser = await savedUserResponse.json();
-    // onSubmitProps.resetForm();
-
-    if (savedUser) {
+      message.success('Register successful!');
+      loginUser(data);
       setPageType(ELoginEnum.Login);
     }
   };
 
   // login
-  const login = async (values: any) => {
-    const loggedInResponse = await fetch('http://localhost:3001/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
-    });
-    const loggedIn = await loggedInResponse.json();
-    const { status } = loggedInResponse ?? {};
-    if (status !== 200) {
-      message.error('Email or password is incorrect!');
+  const handleLogin = async (values: { email: string; password: string | number }) => {
+    const data = await login(values);
+    if (data.error) {
+      message.error(data.error);
     } else {
-      message.success('Login successful!');
-    }
-    console.log('loggedIn::', loggedIn);
-    if (loggedIn) {
-      dispatch(
-        setLogin({
-          user: loggedIn.user,
-          token: loggedIn.token,
-        })
-      );
-      navigate('/home');
+      loginUser(data);
+      navigate('/');
     }
   };
 
   // submit form
   const handleSubmit = (values: any) => {
-    if (isLogin) login(values);
-    if (isRegister) register(values);
+    if (isLogin) handleLogin(values);
+    if (isRegister) handleRegister(values);
   };
 
   useEffect(() => {
     if (pageType) {
       form.resetFields();
-      form.setFieldValue('picture', undefined);
-      setStatus('normal');
-      setDroppedFileSize('');
-      setDroppedFileName('');
     }
   }, [pageType]);
 
@@ -146,52 +115,30 @@ const LoginAndRegisterForm = () => {
           {isRegister && (
             <>
               {/* first name */}
-              <Col span={12}>
+              <Col span={24}>
                 <Form.Item
-                  label='Tên'
+                  label='Họ và tên'
                   required
-                  name='firstName'
+                  name='fullName'
                   className='mb-0'
                   rules={[
                     {
                       validator: async (__, value) => {
                         if (!value) {
-                          return await Promise.reject(new Error('Vui lòng nhập tên của bạn!'));
+                          return await Promise.reject(new Error('vui lòng nhập họ và tên của bạn'));
                         }
-                        if (_.size(value) >= 14) {
-                          return await Promise.reject(new Error('Tên không được dài quá 14 kí tự!'));
+                        if (_.size(value) >= 40) {
+                          return await Promise.reject(new Error('họ và tên không được dài quá 40 kí tự!'));
+                        }
+                        if (_.size(value) < 6) {
+                          return await Promise.reject(new Error('họ và tên phải tối thiểu 6 kí tự!'));
                         }
                         return await Promise.resolve();
                       },
                     },
                   ]}
                 >
-                  <PrimaryInput allowClear placeholder='Nhập tên của bạn' type={'text'} />
-                </Form.Item>
-              </Col>
-
-              {/* last name */}
-              <Col span={12}>
-                <Form.Item
-                  label='Họ'
-                  required
-                  name='lastName'
-                  className='mb-0'
-                  rules={[
-                    {
-                      validator: async (__, value) => {
-                        if (!value) {
-                          return await Promise.reject(new Error('Vui lòng nhập họ của bạn!'));
-                        }
-                        if (_.size(value) >= 14) {
-                          return await Promise.reject(new Error('Họ không được dài quá 14 kí tự!'));
-                        }
-                        return await Promise.resolve();
-                      },
-                    },
-                  ]}
-                >
-                  <PrimaryInput allowClear placeholder='Nhập họ của bạn' type={'text'} />
+                  <PrimaryInput allowClear placeholder='Nhập họ và tên của bạn' type={'text'} />
                 </Form.Item>
               </Col>
 
@@ -223,6 +170,29 @@ const LoginAndRegisterForm = () => {
               {/* occupation */}
               <Col span={24}>
                 <Form.Item
+                  label='Nick-Name'
+                  required
+                  name='username'
+                  className='mb-0'
+                  rules={[
+                    {
+                      validator: async (__, value) => {
+                        if (!value) {
+                          return await Promise.reject(new Error('Vui lòng nick-name của bạn!'));
+                        }
+                        if (_.size(value) >= 200) {
+                          return await Promise.reject(new Error('Nick-name không được dài quá 200 kí tự!'));
+                        }
+                        return await Promise.resolve();
+                      },
+                    },
+                  ]}
+                >
+                  <PrimaryInput allowClear placeholder='Nhập nick-name của bạn' type={'text'} />
+                </Form.Item>
+              </Col>
+              <Col span={24}>
+                <Form.Item
                   label='Nghề nghiệp'
                   required
                   name='occupation'
@@ -246,7 +216,7 @@ const LoginAndRegisterForm = () => {
               </Col>
 
               {/* file */}
-              <Col span={24}>
+              {/* <Col span={24}>
                 <Form.Item
                   name='picture'
                   className='mb-0'
@@ -292,7 +262,7 @@ const LoginAndRegisterForm = () => {
                     className='[&_.ant-upload-list]:hidden'
                   />
                 </Form.Item>
-              </Col>
+              </Col> */}
             </>
           )}
 
@@ -335,6 +305,9 @@ const LoginAndRegisterForm = () => {
                     }
                     if (_.size(value) > 27) {
                       return await Promise.reject(new Error('Password chỉ được nhập tối đa 27 kí tự!'));
+                    }
+                    if (_.size(value) < 6) {
+                      return await Promise.reject(new Error('Password phải nhập tối thiểu 6 kí tự!'));
                     }
                     return await Promise.resolve();
                   },
