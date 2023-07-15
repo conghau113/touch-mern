@@ -1,4 +1,4 @@
-const BASE_URL = 'https://touch-mern.vercel.app/';
+const BASE_URL = 'http://localhost:3001/' || 'https://touch-mern.vercel.app/';
 
 const signup = async (user: any) => {
   try {
