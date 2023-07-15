@@ -5,6 +5,7 @@ import { useInView } from 'react-intersection-observer';
 import { useSearchParams } from 'react-router-dom';
 import { createPost, deletePost, getPosts, getUserLikedPosts, updatePost } from '../../apis/service/posts';
 import Backdrop from '../../components/custom/backdrop/Backdrop';
+import PrimaryCard from '../../components/custom/card/PrimaryCard';
 import SharedFindUsers from '../../components/shared/SharedFindUsers';
 import SharedPostCard from '../../components/shared/SharedPostCard';
 import SharedPostModal from '../../components/shared/SharedPostModal';
