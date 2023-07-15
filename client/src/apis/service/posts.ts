@@ -1,6 +1,6 @@
 import { Params } from 'react-router-dom';
 
-const BASE_URL = 'http://localhost:3001/';
+const BASE_URL = 'https://touch-mern.vercel.app/';
 
 const getUserLikedPosts = async (likerId: string, token: any, query: any) => {
   try {
