@@ -10,11 +10,12 @@ import UpdateProfileModalStore from '../store/UpdateProfileModalStore';
 
 interface UpdateProfileModalProps {
   onSubmit: (values: any) => void;
+  inittialProfile?: any;
 }
 
 export default function UpdateProfileModal(props: UpdateProfileModalProps) {
   const [form] = Form.useForm();
-  const { onSubmit } = props ?? {};
+  const { onSubmit, inittialProfile } = props ?? {};
   const { isOpen, setOpen } = UpdateProfileModalStore();
 
   return (
@@ -29,7 +30,14 @@ export default function UpdateProfileModal(props: UpdateProfileModalProps) {
       destroyOnClose
     >
       <Divider className='mb-4' />
-      <PrimaryForm form={form} name='login-form' layout='vertical' onFinish={onSubmit}>
+      <PrimaryForm
+        form={form}
+        preserve={false}
+        initialValues={inittialProfile}
+        name='login-form'
+        layout='vertical'
+        onFinish={onSubmit}
+      >
         <Row gutter={[12, 12]}>
           {/* email */}
           <Col span={24}>

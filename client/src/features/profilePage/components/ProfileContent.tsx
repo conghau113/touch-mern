@@ -80,7 +80,7 @@ export default function ProfileContent(props: ProfileContentPorps) {
           </PrimaryButton>
         </div>
       </PrimaryCard>
-      <UpdateProfileModal onSubmit={handleSubmit} />
+      <UpdateProfileModal inittialProfile={user} onSubmit={handleSubmit} />
     </>
   );
 }

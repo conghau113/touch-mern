@@ -1,0 +1,21 @@
+{
+  "name": "touch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "cd backend && npm install  && cd ../frontend && pnpm install && pnpm run build",
+    "start": "node backend/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/conghau113/touch-mern.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/basir/mern-amazona/issues"
+  },
+  "homepage": "https://github.com/conghau113/touch-mern"
+}
