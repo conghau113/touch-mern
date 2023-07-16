@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js",
-    "server": "nodemon index.js",
-    "client": "npm start --prefix ./client ",
+    "build": "cd server && npm install  && cd ../client && pnpm install && pnpm run build",
+    "start": "node index.js",
+    "server": "node index.js",
+    "client": "pnpm start --prefix ./client ",
     "dev": "concurrently \"npm start\" \"npm run client\""
   },
   "author": "",
