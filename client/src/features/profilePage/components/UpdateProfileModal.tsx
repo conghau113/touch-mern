@@ -29,7 +29,7 @@ export default function UpdateProfileModal(props: UpdateProfileModalProps) {
       open={isOpen}
       destroyOnClose
     >
-      <Divider className='mb-4' />
+      <Divider className='mb-4 bg-main-purple' />
       <PrimaryForm
         form={form}
         preserve={false}
@@ -39,18 +39,18 @@ export default function UpdateProfileModal(props: UpdateProfileModalProps) {
         onFinish={onSubmit}
       >
         <Row gutter={[12, 12]}>
-          {/* email */}
+          {/* Biography */}
           <Col span={24}>
             <Form.Item
-              required
+              required={false}
               className='mb-0'
               label='Biography'
-              name={'bio'}
+              name={'biography'}
               rules={[
                 {
                   validator: async (__, value) => {
-                    if (!value) {
-                      return await Promise.reject(new Error('Vui lòng nhập biography!'));
+                    if (value.length > 200) {
+                      return await Promise.reject(new Error('biography không được quá 200 kí tự'));
                     }
                     return await Promise.resolve();
                   },
@@ -113,9 +113,9 @@ export default function UpdateProfileModal(props: UpdateProfileModalProps) {
           </Col>
 
           {/* occupation */}
-          <Col span={24}>
+          {/* <Col span={24}>
             <Form.Item
-              label='Nick-Name'
+              label='User name'
               required
               name='username'
               className='mb-0'
@@ -135,7 +135,7 @@ export default function UpdateProfileModal(props: UpdateProfileModalProps) {
             >
               <PrimaryInput allowClear placeholder='Nhập nick-name của bạn' type={'text'} />
             </Form.Item>
-          </Col>
+          </Col> */}
           <Col span={24}>
             <Form.Item
               label='Nghề nghiệp'
@@ -161,10 +161,10 @@ export default function UpdateProfileModal(props: UpdateProfileModalProps) {
           </Col>
 
           {/* button submit */}
-          <Divider className='mb-2 mt-4 opacity-20 bg-purple-900 shadow-sm' />
+          <Divider className='mb-2 mt-4 bg-main-purple shadow-sm' />
           <Col span={24}>
             <div className='flex justify-end items-end mb-4'>
-              <PrimaryButton htmlType='submit' className='bg-purple-950 text-purple-200 h-12 w-full text-center '>
+              <PrimaryButton htmlType='submit' className='bg-main-purple text-white h-12 w-full text-center '>
                 Update
               </PrimaryButton>
             </div>

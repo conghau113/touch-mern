@@ -1,15 +1,26 @@
-import { EditFilled, EllipsisOutlined, HeartFilled, HeartOutlined, MessageOutlined } from '@ant-design/icons';
-import { Badge, Divider, Dropdown, MenuProps, Space, Tooltip, Typography } from 'antd';
+import {
+  EditFilled,
+  EllipsisOutlined,
+  HeartFilled,
+  HeartOutlined,
+  MessageOutlined,
+  UserAddOutlined,
+  UserDeleteOutlined,
+} from '@ant-design/icons';
+import { Divider, Dropdown, Image, MenuProps, Space, Tooltip, Typography } from 'antd';
 import dayjs from 'dayjs';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { likePost, unlikePost } from '../../apis/service/posts';
+import { followUser, unFollow } from '../../apis/service/users';
 import { EPostModal } from '../../enums/EPostModal';
 import { isLoggedIn } from '../../helper/authhelper';
+import useModalStore from '../../state/useModalStore';
 import usePostStore from '../../state/usePostStore';
 import PrimaryButton from '../custom/button/PrimaryButton';
 import PrimaryCard from '../custom/card/PrimaryCard';
+import PrimaryTooltip from '../custom/tooltip/PrimaryTooltip';
 import SharedAvatarAuthUser from './SharedAvatar';
 import SharedAvatarGroup from './SharedAvatarGroup';
 import SharedModalLike from './SharedModalLiked';
@@ -18,12 +29,15 @@ interface SharedPostCardProps {
   post: any;
   postId: string;
   onDeleteCard?: (_id: string) => void;
+  fetchPost?: () => void;
 }
 
 export default function SharedPostCard(props: SharedPostCardProps) {
-  const { post, onDeleteCard, postId } = props ?? {};
-  const { poster, content, createdAt, likeCount, userLikePreview, commentCount, title, edited, _id } = post ?? {};
-  const { username } = poster;
+  const { post, onDeleteCard, postId, fetchPost } = props ?? {};
+  const { poster, image, content, createdAt, likeCount, userLikePreview, commentCount, title, edited, _id } =
+    post ?? {};
+  const { username } = poster ?? {};
+
   const user = isLoggedIn();
   const userAuthName = user && isLoggedIn()?.username;
   const isAuth = _.includes(userAuthName, username);
@@ -35,8 +49,9 @@ export default function SharedPostCard(props: SharedPostCardProps) {
   );
 
   const navigate = useNavigate();
-
+  const { openStaticModal } = useModalStore();
   const [like, setLike] = useState<boolean>(isLiked ?? false);
+  const [follow, setFollow] = useState<boolean>(false);
   const [isOpenModalLike, setOpenModalLike] = useState<boolean>(false);
   const [likeCountClick, setLikeCountClick] = useState<number>(likeCount);
   const { setOpenPostModal, setModePostModal, setPostValues } = usePostStore();
@@ -60,7 +75,21 @@ export default function SharedPostCard(props: SharedPostCardProps) {
       key: '2',
       danger: true,
       onClick: () => {
-        onDeleteCard?.(_id);
+        openStaticModal({
+          variant: 'error',
+          title: 'Xác nhận xóa bài viết',
+          footerButtons: [
+            'cancel',
+            {
+              type: 'accept',
+              buttonProps: {
+                onClick: () => {
+                  onDeleteCard?.(_id);
+                },
+              },
+            },
+          ],
+        });
       },
     },
   ];
@@ -75,6 +104,14 @@ export default function SharedPostCard(props: SharedPostCardProps) {
       await unlikePost(postId, user);
     }
   };
+  const handleFllowUser = async () => {
+    setFollow(!follow);
+    if (!follow) {
+      await followUser(poster._id, user);
+    } else {
+      await unFollow(poster._id, user);
+    }
+  };
 
   useEffect(() => {
     setLikeCountClick(likeCount);
@@ -83,28 +120,32 @@ export default function SharedPostCard(props: SharedPostCardProps) {
 
   return (
     <>
-      <PrimaryCard className='bg-main-light'>
+      <PrimaryCard className='bg-white shadow-sm border-main-purple'>
         <div className='flex justify-between'>
-          <div className='flex items-center gap-2'>
-            <SharedAvatarAuthUser userName={_.size(username) ? username : userAuthName} />
+          <div className='flex items-center gap-2 cursor-pointer' onClick={() => navigate(`/users/${username}`)}>
+            <SharedAvatarAuthUser
+              avatar={!!_.size(poster?.avatar) ? poster?.avatar?.[0]?.avatar?.[0]?.url : undefined}
+              userName={username}
+            />
             <div className='flex gap-2 items-center'>
-              <Typography className='text-base flex items-center font-medium'>{username}</Typography>
-              <Badge status='default' />
-              <Typography className='flex items-center text-xs font-normal text-gray-600'>
-                {dayjs(createdAt).format('DD/MM/YYYY HH:mm')}
-              </Typography>
-              {edited && (
-                <>
-                  <Tooltip title='Đã chỉnh sữa'>
-                    <Typography className='flex items-center text-xs font-normal text-gray-600'>
-                      <EditFilled className='text-gray-400' />
-                    </Typography>
-                  </Tooltip>
-                </>
-              )}
+              <div>
+                <Typography className='text-base flex items-center font-medium'>#{username}</Typography>
+                <Typography className='flex  items-center text-[11px] font-normal text-gray-600'>
+                  {dayjs(createdAt).format('DD/MM/YYYY HH:mm')}
+                  {edited && (
+                    <>
+                      <Tooltip title='Đã chỉnh sữa' className='ml-1'>
+                        <Typography className='flex items-center text-xs font-normal text-gray-600'>
+                          <EditFilled className='text-gray-400' />
+                        </Typography>
+                      </Tooltip>
+                    </>
+                  )}
+                </Typography>
+              </div>
             </div>
           </div>
-          {isAuth && (
+          {isAuth ? (
             <Dropdown
               menu={{ items }}
               placement='bottomRight'
@@ -112,16 +153,32 @@ export default function SharedPostCard(props: SharedPostCardProps) {
               // trigger={['click']}
             >
               <PrimaryButton
-                size='small'
+                size='middle'
                 shape='circle'
                 className='flex items-center justify-center border-none bg-main-purple py-1 text-xl font-medium'
               >
                 <EllipsisOutlined className='text-main-blue' />
               </PrimaryButton>
             </Dropdown>
+          ) : (
+            <Space onClick={handleFllowUser}>
+              {!follow ? (
+                <Typography>
+                  <PrimaryTooltip className='mr-4 cursor-pointer shadow-sm'>
+                    <UserAddOutlined className='text-base text-blue-6' />
+                  </PrimaryTooltip>
+                </Typography>
+              ) : (
+                <Typography>
+                  <PrimaryTooltip className='mr-4 cursor-pointer shadow-sm'>
+                    <UserDeleteOutlined className='text-base ' />
+                  </PrimaryTooltip>
+                </Typography>
+              )}
+            </Space>
           )}
         </div>
-        <Space className='flex flex-col items-start mt-2 gap-0'>
+        <div className='flex flex-col [&_.ant-image]:w-full items-start mt-2 gap-0 w-full'>
           <Typography.Paragraph
             ellipsis={{ rows: 2, expandable: true, symbol: 'Xem thêm' }}
             className='font-medium mb-0 whitespace-pre-line'
@@ -134,8 +191,13 @@ export default function SharedPostCard(props: SharedPostCardProps) {
           >
             {content}
           </Typography.Paragraph>
-        </Space>
-        <Divider className='my-3' />
+          {!!_.size(image) && (
+            <PrimaryCard variant='no-spacing' className='rounded-lg border-none mt-4'>
+              <Image className='w-full rounded-sm' src={`${image?.[0]?.url}`} />
+            </PrimaryCard>
+          )}
+        </div>
+        <Divider className='my-3 bg-main-purple' />
         <Space className='flex items-center gap-3 justify-between'>
           <Space>
             <Space onClick={handleLikePost} className='cursor-pointer hover:opacity-70'>
@@ -155,9 +217,9 @@ export default function SharedPostCard(props: SharedPostCardProps) {
             <>
               <div
                 onClick={() => setOpenModalLike(true)}
-                className='border-2 px-2 py-1 rounded-full flex justify-center items-center border-white cursor-pointer'
+                className='border px-2 py-1 rounded-full flex justify-center items-center border-main-purple cursor-pointer'
               >
-                <HeartFilled className='text-main-pink text-lg -rotate-12 mr-1' />
+                <HeartFilled className='text-red-3 text-lg -rotate-12 mr-1' />
                 <SharedAvatarGroup UserLikePreview={userLikePreview} />
               </div>
               <SharedModalLike isOpen={isOpenModalLike} setOpen={handleSetOpenModalLike} postId={_id} />

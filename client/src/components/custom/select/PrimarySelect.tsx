@@ -44,7 +44,7 @@ export default React.forwardRef(function PrimarySelect(
               [&_.ant-select-selection-search-input]:pr-5 [&_.ant-select-selection-search]:flex
               [&_.ant-select-selection-search]:items-center        
               [&_.ant-select-selector]:h-full       
-              [&_.ant-select-selector]:border-blue-20 
+              [&_.ant-select-selector]:border-main-purple 
             `,
             className
           )}
@@ -83,7 +83,7 @@ export default React.forwardRef(function PrimarySelect(
           className={tw(
             `
 
-          h-12 w-full border-blue-20
+          h-12 w-full border-main-purple
            [&_.ant-select-selection-item]:flex 
           [&_.ant-select-selection-item]:items-center [&_.ant-select-selection-placeholder]:flex 
           [&_.ant-select-selection-placeholder]:items-center 
@@ -92,7 +92,7 @@ export default React.forwardRef(function PrimarySelect(
           [&_.ant-select-selection-search]:flex
           [&_.ant-select-selection-search]:items-center
           [&_.ant-select-selector]:h-full
-          [&_.ant-select-selector]:border-blue-19
+          [&_.ant-select-selector]:border-main-purple
           [&_.ant-select-selector]:border-opacity-20
           
         `,
@@ -116,7 +116,7 @@ export default React.forwardRef(function PrimarySelect(
           className={tw(
             `
             h-12
-              w-full border-blue-20 [&_.ant-select-clear]:mr-5
+              w-full border-main-purple [&_.ant-select-clear]:mr-5
                [&_.ant-select-selection-item]:flex 
               [&_.ant-select-selection-item]:items-center [&_.ant-select-selection-placeholder]:flex 
               [&_.ant-select-selection-placeholder]:items-center 
@@ -125,7 +125,7 @@ export default React.forwardRef(function PrimarySelect(
               [&_.ant-select-selection-search]:flex
               [&_.ant-select-selection-search]:items-center
               [&_.ant-select-selector]:h-full
-              [&_.ant-select-selector]:border-blue-19
+              [&_.ant-select-selector]:border-main-purple
               [&_.ant-select-selector]:border-opacity-20
             `,
             className

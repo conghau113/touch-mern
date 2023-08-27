@@ -120,7 +120,7 @@ export default React.forwardRef(function PrimarySelectCustomDropdown(
       }}
       className={tw(
         `
-          h-12 w-full border-blue-20
+          h-12 w-full border-main-purple
           [&_.ant-select-selection-item]:flex [&_.ant-select-selection-item]:items-center 
           [&_.ant-select-selection-placeholder]:flex [&_.ant-select-selection-placeholder]:items-center 
           [&_.ant-select-selection-search]:flex  [&_.ant-select-selection-search]:items-center

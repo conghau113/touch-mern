@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { deletePost, getPost, updatePost } from '../../apis/service/posts';
 import Backdrop from '../../components/custom/backdrop/Backdrop';
+import PrimaryStaticModal from '../../components/custom/modal/PrimaryStaticModal';
 import SharedFindUsers from '../../components/shared/SharedFindUsers';
 import SharedPostCard from '../../components/shared/SharedPostCard';
 import SharedPostModal from '../../components/shared/SharedPostModal';
@@ -84,6 +85,7 @@ export default function PostPage() {
         </Col>
       </Row>
       <SharedPostModal isOpen={isOpenPostModal} title={'Update post'} onSubmit={handelSubmitPostModal} />
+      <PrimaryStaticModal />
       <Backdrop />
       <FloatButton.BackTop />
     </>

@@ -1,24 +1,18 @@
 import { AvatarProps } from 'antd';
 import _ from 'lodash';
-import { isLoggedIn } from '../../helper/authhelper';
 import { tw } from '../../utils/classUtil';
 import PrimaryAvatar from '../custom/avatar/PrimaryAvatar';
 
 interface SharedAvatarAuthUserProps extends AvatarProps {
   userName?: string;
+  avatar?: string;
 }
 
-export default function SharedAvatarAuthUser({ userName, className, ...restProps }: SharedAvatarAuthUserProps) {
-  const user = isLoggedIn() ?? '';
-  const username = user && isLoggedIn().username;
+export default function SharedAvatarAuthUser({ userName, avatar, className, ...restProps }: SharedAvatarAuthUserProps) {
+  const url = !!_.size(avatar) ? avatar : `https://robohash.org/${userName}`;
   return (
     <div className='cursor-pointer rounded-full border-main-blue border-2'>
-      <PrimaryAvatar
-        {...restProps}
-        variant='image'
-        className={tw('h-10 w-10', className)}
-        username={_.size(userName) ? userName : username}
-      />
+      <PrimaryAvatar {...restProps} variant={`avatar`} className={tw('h-10 w-10', className)} username={url} />
     </div>
   );
 }

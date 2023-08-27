@@ -42,7 +42,7 @@ export default function Commenteditor({ addComment, fetchPost, setReplying, comm
   };
   return (
     <>
-      <PrimaryCard className='bg-main-light mt-4'>
+      <PrimaryCard className='bg-white mt-4 border-main-purple'>
         <div className='flex w-full gap-3 justify-center items-center'>
           <div className='flex items-start'>
             <SharedAvatarAuthUser />

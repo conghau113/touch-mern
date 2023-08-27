@@ -1,8 +1,10 @@
-import { Modal, type ModalFuncProps, type ModalProps, type ResultProps } from 'antd';
+import { Modal, Space, Typography, type ModalFuncProps, type ModalProps, type ResultProps } from 'antd';
+import _ from 'lodash';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tw } from '../../../utils/classUtil';
-import { type PrimaryButtonProps } from '../button/PrimaryButton';
+import PrimaryButton, { type PrimaryButtonProps } from '../button/PrimaryButton';
+import PrimaryResult from '../result/PrimaryResult';
 
 type Variant = 'default' | 'preview' | 'success' | 'warning' | 'error' | 'confirm' | 'info';
 type ModalType = NonNullable<ModalFuncProps['type']>;
@@ -89,6 +91,133 @@ export default function PrimaryModal(props: PrimaryModalProps) {
   } = props;
   const navigate = useNavigate();
 
+  const renderFooterButtons = () => {
+    if (_.size(footerButtons)) {
+      // Accept button
+      const acceptButton = (buttonProps?: PrimaryButtonProps) => {
+        const { onClick: buttonPropsOnClick, id, ...restButtonProps } = buttonProps ?? {};
+
+        return (
+          <PrimaryButton
+            key={id}
+            id={id}
+            variant='mini-blue-primary'
+            className='w-fit'
+            type='primary'
+            onClick={(event) => {
+              if (buttonPropsOnClick) {
+                buttonPropsOnClick(event as React.MouseEvent<HTMLButtonElement, MouseEvent>);
+                onCloseModal?.();
+              } else {
+                onCloseModal?.();
+              }
+            }}
+            {...restButtonProps}
+          >
+            Đồng ý
+          </PrimaryButton>
+        );
+      };
+
+      // Cancel button
+      const cancelButton = (buttonProps?: PrimaryButtonProps) => {
+        const { onClick: buttonPropsOnClick, id, ...restButtonProps } = buttonProps ?? {};
+        return (
+          <Space>
+            <PrimaryButton
+              key={id}
+              id={id}
+              type='primary'
+              variant='mini-cancel'
+              className='w-fit'
+              onClick={(event) => {
+                if (buttonPropsOnClick) {
+                  buttonPropsOnClick(event as React.MouseEvent<HTMLButtonElement, MouseEvent>);
+                  onCloseModal?.();
+                } else {
+                  onCloseModal?.();
+                }
+              }}
+              {...restButtonProps}
+            >
+              Hủy
+            </PrimaryButton>
+          </Space>
+        );
+      };
+
+      // Confirm button
+      const confirmButton = (buttonProps?: PrimaryButtonProps) => {
+        const { onClick: buttonPropsOnClick, id, ...restButtonProps } = buttonProps ?? {};
+
+        return (
+          <PrimaryButton
+            key={id}
+            id={id}
+            variant='mini-blue-primary'
+            // type='primary'
+            className='w-fit'
+            onClick={(event) => {
+              if (buttonPropsOnClick) {
+                buttonPropsOnClick(event as React.MouseEvent<HTMLButtonElement, MouseEvent>);
+                onCloseModal?.();
+              } else {
+                onCloseModal?.();
+              }
+            }}
+            {...restButtonProps}
+          >
+            Xác nhận
+          </PrimaryButton>
+        );
+      };
+
+      return (
+        <div className={tw('flex w-full justify-center gap-2', footerClassName)}>
+          {_.map(footerButtons, (footerButton, index) => {
+            // Nếu là chuỗi thì nó là FooterButtonType
+            if (_.isString(footerButton)) {
+              switch (footerButton) {
+                case 'accept': {
+                  return acceptButton({ id: `${index}` });
+                }
+                case 'cancel': {
+                  return cancelButton({ id: `${index}` });
+                }
+                case 'confirm': {
+                  return confirmButton({ id: `${index}` });
+                }
+                default: {
+                  return <></>;
+                }
+              }
+            }
+
+            // Nếu là object thì nó là FooterButtonOptions
+            if (_.isPlainObject(footerButton)) {
+              const { type, buttonProps } = footerButton;
+              switch (type) {
+                case 'accept': {
+                  return acceptButton(buttonProps);
+                }
+                case 'cancel': {
+                  return cancelButton(buttonProps);
+                }
+                case 'confirm': {
+                  return confirmButton(buttonProps);
+                }
+                default: {
+                  return <></>;
+                }
+              }
+            }
+          })}
+        </div>
+      );
+    }
+    return footer;
+  };
+
   // Variant
   switch (variant) {
     case 'default': {
@@ -96,6 +225,95 @@ export default function PrimaryModal(props: PrimaryModalProps) {
         <Modal className={className} footer={footer} title={title} onCancel={onCancel} onOk={onOk} {...restProps} />
       );
     }
+
+    case 'success': {
+      return (
+        <Modal
+          className={tw(className)}
+          closable={false}
+          centered
+          footer={renderFooterButtons()}
+          onCancel={onCancel}
+          onOk={onOk}
+          {...restProps}
+        >
+          <PrimaryResult
+            className='py-0'
+            status='success'
+            title={<Typography className='text-base font-medium'>{title}</Typography>}
+            subTitle={<Typography className='text-dark-7'>{subtitle}</Typography>}
+            {...resultProps}
+          />
+        </Modal>
+      );
+    }
+
+    case 'warning': {
+      return (
+        <Modal
+          className={tw(className)}
+          closable={false}
+          centered
+          footer={renderFooterButtons()}
+          onCancel={onCancel}
+          onOk={onOk}
+          {...restProps}
+        >
+          <PrimaryResult
+            className='py-0'
+            status='warning'
+            title={<Typography className='text-base font-medium'>{title}</Typography>}
+            subTitle={<Typography className='whitespace-wrap text-left text-dark-7'>{subtitle}</Typography>}
+            {...resultProps}
+          />
+        </Modal>
+      );
+    }
+
+    case 'confirm': {
+      return (
+        <Modal
+          className={tw(className)}
+          closable={false}
+          centered
+          footer={renderFooterButtons()}
+          onCancel={onCancel}
+          onOk={onOk}
+          {...restProps}
+        >
+          <PrimaryResult
+            status='warning'
+            className='py-0'
+            title={<Typography className='text-base font-medium'>{title}</Typography>}
+            subTitle={<Typography className='text-dark-7'>{subtitle}</Typography>}
+            {...resultProps}
+          />
+        </Modal>
+      );
+    }
+
+    case 'error': {
+      return (
+        <Modal
+          className={tw(className)}
+          closable={false}
+          centered
+          footer={renderFooterButtons()}
+          onCancel={onCancel}
+          onOk={onOk}
+          {...restProps}
+        >
+          <PrimaryResult
+            className='py-0'
+            status='error'
+            title={<Typography className='text-base font-medium'>{title}</Typography>}
+            subTitle={<Typography className='text-dark-7'>{subtitle}</Typography>}
+            {...resultProps}
+          />
+        </Modal>
+      );
+    }
+
     default:
       break;
   }
@@ -108,6 +326,7 @@ export default function PrimaryModal(props: PrimaryModalProps) {
         [&_.ant-modal-content]:p-0 
         [&_.ant-modal-footer]:m-0 [&_.ant-modal-footer]:px-6 [&_.ant-modal-footer]:py-4
         [&_.ant-modal-header]:px-6 [&_.ant-modal-header]:pb-2 [&_.ant-modal-header]:pt-4
+        [&_.ant-result-icon]:mb-1
         `,
         noBodySpacing && '[&_.ant-modal-body]:px-0',
         className

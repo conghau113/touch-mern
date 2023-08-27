@@ -28,7 +28,7 @@ interface HomePageProps {
 const HomePageContent = (props: HomePageProps) => {
   const { isOpenPostModal, setOpenPostModal, setModePostModal, modePostModal, postValues } = usePostStore();
   const user = isLoggedIn();
-  const username = user && isLoggedIn().username;
+  const username = user && isLoggedIn()?.username;
   const { setOpenBackdrop } = useBackdropStore();
 
   const [page, setPage] = useState<number>(0);
@@ -173,8 +173,8 @@ const HomePageContent = (props: HomePageProps) => {
               <MyPostWidget username={username} onClick={() => setOpenPostModal(true)} />
               {searchExists && (
                 <div className='mt-4'>
-                  <Typography className='text-main-light'>Showing results for "{search.get('search')}"</Typography>
-                  <Typography className='text-main-light'>{count} results found</Typography>
+                  <Typography className='text-white'>Showing results for "{search.get('search')}"</Typography>
+                  <Typography className='text-white'>{count} results found</Typography>
                 </div>
               )}
               <Row gutter={[12, 16]} className='mt-4'>
@@ -188,12 +188,12 @@ const HomePageContent = (props: HomePageProps) => {
               </Row>
               {loading && (
                 <div className='mt-2 flex justify-center'>
-                  <Spin className='[&_.ant-spin-dot-item]:bg-main-light' size='default' spinning={loading} />
+                  <Spin className='[&_.ant-spin-dot-item]:bg-white' size='default' spinning={loading} />
                 </div>
               )}
               {!loading && _.size(posts) > 0 && <div ref={ref} />}
 
-              {end && <Typography className='text-center mt-2 text-main-light'>All posts have been viewed</Typography>}
+              {end && <Typography className='text-center mt-2 text-white'>All posts have been viewed</Typography>}
             </Col>
             <Col span={6}>
               <SharedFindUsers />

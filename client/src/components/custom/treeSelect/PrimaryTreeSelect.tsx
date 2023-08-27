@@ -23,7 +23,7 @@ export default React.forwardRef(function PrimaryTreeSelect(
           [&_.ant-select-selection-placeholder]:text-dark-12 [&_.ant-select-selection-search]:flex 
           [&_.ant-select-selection-search]:items-center
           [&_.ant-select-selector]:h-full
-          [&_.ant-select-selector]:border-blue-19
+          [&_.ant-select-selector]:border-main-purple
           [&_.ant-select-selector]:border-opacity-20
         `,
         className

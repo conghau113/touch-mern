@@ -1,4 +1,4 @@
-import { BackTop, Empty, message } from 'antd';
+import { Empty, message } from 'antd';
 import Typography from 'antd/es/typography/Typography';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
@@ -127,9 +127,9 @@ export default function CommentPost({ fetchPost, profileUser }: CommentPostProps
             );
           })
         ) : (
-          <PrimaryCard className='bg-main-light'>
+          <PrimaryCard className='bg-white'>
             <Empty description='No comment yet...' />
-            <Typography className='text-center'>Be the first one to commnet!</Typography>
+            <Typography className='text-center text-main-purple'>Be the first one to commnet!</Typography>
           </PrimaryCard>
         )}
       </div>

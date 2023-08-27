@@ -1,9 +1,11 @@
 import { FileImageOutlined } from '@ant-design/icons';
 import { CardProps } from 'antd';
+import _ from 'lodash';
 import PrimaryButton from '../../../components/custom/button/PrimaryButton';
 import PrimaryCard from '../../../components/custom/card/PrimaryCard';
 import PrimaryInput from '../../../components/custom/input/PrimaryInput';
 import SharedAvatarAuthUser from '../../../components/shared/SharedAvatar';
+import useUserStore from '../../../state/useUserStore';
 
 interface MyPostWidgetProps extends CardProps {
   picturePath?: string;
@@ -12,13 +14,18 @@ interface MyPostWidgetProps extends CardProps {
 
 export default function MyPostWidget(props: MyPostWidgetProps) {
   const { username, ...restProps } = props ?? {};
+  const { user } = useUserStore();
   return (
-    <PrimaryCard {...restProps} variant='no-spacing' className='px-4 pt-4 pb-2 bg-main-light'>
+    <PrimaryCard {...restProps} variant='no-spacing' className='px-4 pt-4 pb-2 bg-white border border-main-purple'>
       <div className='flex items-center gap-3'>
         <div>
-          <SharedAvatarAuthUser />
+          <SharedAvatarAuthUser avatar={!!_.size(user?.avatar) ? user?.avatar : undefined} userName={username} />
         </div>
-        <PrimaryInput readOnly className='h-10 rounded-full' placeholder='Bạn đang nghĩ gì?' />
+        <PrimaryInput
+          readOnly
+          className='h-11 rounded-full border-dashed border-main-purple'
+          placeholder='Bạn đang nghĩ gì?'
+        />
       </div>
       <div className='flex justify-end items-center w-full mt-2 gap-3'>
         {/* <div className='w-1/2 cursor-pointer hover:opacity-60 hover:bg-gray-100 flex justify-center  py-2.5'>

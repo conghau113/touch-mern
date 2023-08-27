@@ -17,7 +17,7 @@ export default function CommentUpdateEditor({ onSubmit, initialValue }: CommentU
   const [form] = Form.useForm();
   const [checkValue, setValue] = useState<string>('');
   return (
-    <PrimaryCard className='bg-main-light mt-4'>
+    <PrimaryCard className='bg-white mt-4'>
       <div className='flex w-full gap-3 justify-center items-center'>
         <div className='flex items-start'>
           <SharedAvatarAuthUser />

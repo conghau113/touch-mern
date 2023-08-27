@@ -9,6 +9,7 @@ import PrimaryCard from '../../../components/custom/card/PrimaryCard';
 import ReplyCommentIcon from '../../../components/custom/icon/ReplyCommentIcon';
 import SharedAvatarAuthUser from '../../../components/shared/SharedAvatar';
 import { isLoggedIn } from '../../../helper/authhelper';
+import useModalStore from '../../../state/useModalStore';
 import Commenteditor from './CommentEditor';
 import CommentUpdateEditor from './CommentUpdateEditor';
 
@@ -26,6 +27,8 @@ export default function CommentCard(props: CommentCardProps) {
   const [replying, setReplying] = useState(false);
   const [editing, setEditing] = useState(false);
   const [comment, setComment] = useState(props.comment);
+  const [showAllComment, setShowAllCommnet] = useState<boolean>(false);
+  const { openStaticModal } = useModalStore();
 
   const user = isLoggedIn();
   const isAuthor = user && user.userId === comment.commenter._id;
@@ -43,7 +46,21 @@ export default function CommentCard(props: CommentCardProps) {
       key: '2',
       danger: true,
       onClick: () => {
-        handleDelete();
+        openStaticModal({
+          variant: 'error',
+          title: 'Xác nhận xóa phản hồi',
+          footerButtons: [
+            'cancel',
+            {
+              type: 'accept',
+              buttonProps: {
+                onClick: () => {
+                  handleDelete();
+                },
+              },
+            },
+          ],
+        });
       },
     },
   ];
@@ -65,12 +82,12 @@ export default function CommentCard(props: CommentCardProps) {
 
   return (
     <>
-      <PrimaryCard className='bg-main-light my-2'>
+      <PrimaryCard className='bg-white my-2 [&_.ant-card]:mt-3 shadow-sm border-main-purple'>
         <div className='flex justify-between'>
           <div className='flex items-center gap-2'>
             <SharedAvatarAuthUser userName={comment.commenter.username} />
             <div className='flex gap-2 items-center'>
-              <Typography className='text-base flex items-center font-medium'>{comment.commenter.username}</Typography>
+              <Typography className='text-base flex items-center font-medium'>#{comment.commenter.username}</Typography>
               <Badge status='default' />
               <Typography className='flex items-center text-xs font-normal text-gray-600'>
                 {dayjs(comment.createdAt).format('DD/MM/YYYY HH:mm')}
@@ -96,7 +113,7 @@ export default function CommentCard(props: CommentCardProps) {
                     onClick={() => setEditing(false)}
                     shape={editing ? 'default' : 'circle'}
                     className={`${
-                      editing ? 'bg-main-pink text-main-light' : 'bg-main-purple text-main-blue'
+                      editing ? 'bg-main-pink text-white' : 'bg-main-purple text-main-blue'
                     } flex items-center justify-center `}
                   >
                     Cancel edit <EditFilled className='text-main-blue' />
@@ -119,7 +136,7 @@ export default function CommentCard(props: CommentCardProps) {
                     <PrimaryButton
                       shape={replying ? 'default' : 'circle'}
                       className={`${
-                        replying ? 'bg-main-pink text-main-light' : 'bg-main-purple text-main-blue'
+                        replying ? 'bg-main-pink text-white' : 'bg-main-purple text-main-blue'
                       } flex items-center justify-center `}
                     >
                       Cancel <ReplyCommentIcon />
@@ -179,7 +196,10 @@ export default function CommentCard(props: CommentCardProps) {
         {commentChild &&
           _.map(commentChild, (reply, index) => {
             return (
-              <div key={reply._id} className='border-t-[1px] border-t-main-purple mt-2 [&_.ant-card]:my-0'>
+              <div
+                key={reply._id}
+                className='border-t-[1px] border-dashed border-t-main-purple mt-3 [&_.ant-card]:my-0'
+              >
                 <CommentCard
                   comment={reply}
                   depth={depth + 1}
@@ -188,6 +208,25 @@ export default function CommentCard(props: CommentCardProps) {
                   editComment={editComment}
                   commentChild={reply?.children}
                 />
+                {/* {reply?.children?.length > 1 ? (
+                  !showAllComment ? (
+                    <Typography
+                      onClick={() => setShowAllCommnet(true)}
+                      className='text-xs italic flex items-center justify-end mt-0.5 text-main-purple hover:underline cursor-pointer text-end px-1'
+                    >
+                      <ReplyCommentIcon className='rotate-180 scale-[70%]' />
+                      Show all comments
+                    </Typography>
+                  ) : (
+                    <Typography
+                      onClick={() => setShowAllCommnet(false)}
+                      className='text-xs italic flex items-center justify-end mt-0.5 text-main-purple hover:underline cursor-pointer text-end px-1'
+                    >
+                      <ReplyCommentIcon className='rotate-0 scale-[70%]' />
+                      Hide comments
+                    </Typography>
+                  )
+                ) : null} */}
               </div>
             );
           })}

@@ -30,10 +30,8 @@ export default function SharedSortSelectPost(props: SortBySelectProps) {
   return (
     <>
       <PrimaryCard className='bg-main-purple'>
-        <Typography className='text-lg gap-2 text-main-light mb-2 font-medium flex items-center'>
-          Sắp xếp theo:
-        </Typography>
-        <Divider className='my-2 bg-main-light' />
+        <Typography className='text-lg gap-2 text-white mb-2 font-medium flex items-center'>Sorted by:</Typography>
+        <Divider className='my-2 bg-white' />
         <PrimarySelect
           onChange={(e) => handleChange(e)}
           variant='normal'

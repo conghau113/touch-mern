@@ -3,17 +3,20 @@ import { Col, FloatButton, Menu, MenuProps, message, Row, Space } from 'antd';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { getUser } from '../../apis/service/users';
+import { getUser, updateUser } from '../../apis/service/users';
 import Backdrop from '../../components/custom/backdrop/Backdrop';
 import PrimaryCard from '../../components/custom/card/PrimaryCard';
+import PrimaryStaticModal from '../../components/custom/modal/PrimaryStaticModal';
 import SharedFindUsers from '../../components/shared/SharedFindUsers';
 import { EContentType } from '../../enums/EContentType';
 import { isLoggedIn } from '../../helper/authhelper';
 import useBackdropStore from '../../state/useBackdropStore';
+import useUserStore from '../../state/useUserStore';
 import HomePage from '../homePage';
 import Navbar from '../navbar';
 import ProfileContent from './components/ProfileContent';
 import { EProfile } from './enum/EProfile';
+import UpdateProfileModalStore from './store/UpdateProfileModalStore';
 
 const ProfilePage = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -25,6 +28,8 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { setOpenBackdrop } = useBackdropStore();
+  const { setOpen } = UpdateProfileModalStore();
+  const { setUser } = useUserStore();
 
   const fetchUser = async () => {
     setOpenBackdrop(true);
@@ -37,6 +42,12 @@ const ProfilePage = () => {
     } else {
       setProfile(data);
     }
+  };
+
+  const handleSubmitModal = async (values: any) => {
+    await updateUser(user, { ...values });
+    setProfile({ ...profile, user: { ...profile.user, ...values } });
+    setOpen(false);
   };
 
   const items: MenuProps['items'] = [
@@ -66,6 +77,12 @@ const ProfilePage = () => {
     fetchUser();
   }, [location, params]);
 
+  useEffect(() => {
+    if (profile) {
+      setUser({ avatar: profile?.user?.avatar?.[0]?.avatar?.[0]?.url });
+    }
+  }, [profile]);
+
   return (
     <>
       <Row>
@@ -76,12 +93,12 @@ const ProfilePage = () => {
         <Col span={24} className='px-8'>
           <Row gutter={[24, 0]} className='mt-20 '>
             <Col span={6}>
-              <ProfileContent profile={profile} />
+              <ProfileContent fetchUser={fetchUser} onSubmit={handleSubmitModal} profile={profile} />
             </Col>
             <Col span={12}>
               <PrimaryCard className='p-0 bg-transparent'>
                 <Menu
-                  className='bg-main-purple flex justify-center text-main-light [&_.ant-menu-item]:hover:text-main-light rounded-t-xl'
+                  className='bg-main-purple flex justify-center text-white [&_.ant-menu-item]:hover:text-white rounded-t-xl'
                   onClick={(e: any) => setTab(e.key)}
                   selectedKeys={[tab]}
                   mode='horizontal'
@@ -116,6 +133,7 @@ const ProfilePage = () => {
           </Row>
         </Col>
       </Row>
+      <PrimaryStaticModal />
       <Backdrop />
       <FloatButton.BackTop />
     </>
@@ -123,3 +141,6 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+function handleLogin(values: any) {
+  throw new Error('Function not implemented.');
+}

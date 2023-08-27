@@ -13,15 +13,12 @@ const options = { new: true, runValidators: true };
 
 const createPost = async (req, res) => {
   try {
-    const { title, content, userId } = req.body;
-    let image = req.files?.image || '';
+    console.log('thumbUrl::', req.body);
+
+    const { title, content, userId, image } = req.body;
 
     if (!(title && content)) {
       throw new Error('All input required');
-    }
-    if (image) {
-      const { secure_url: src, public_id } = await uploadImage(image);
-      image = { src, publicID: public_id };
     }
     if (cooldown.has(userId)) {
       throw new Error('You are posting too frequently. Please try again shortly.');
@@ -75,7 +72,7 @@ const getPost = async (req, res) => {
 const updatePost = async (req, res) => {
   try {
     const postId = req.params.id;
-    const { content, title, userId, isAdmin } = req.body;
+    const { content, title, userId, isAdmin, image } = req.body;
 
     const post = await Post.findById(postId);
     console.log('post:', post);
@@ -90,6 +87,7 @@ const updatePost = async (req, res) => {
 
     post.title = title;
     post.content = content;
+    post.image = image;
     post.edited = true;
 
     await post.save();

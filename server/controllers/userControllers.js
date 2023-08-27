@@ -103,10 +103,42 @@ const login = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const { userId, biography, fullName, location, occupation, username } = req.body;
+    const avatar = req.body ?? {};
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error('User does not exist');
+    }
+    console.log('req.body::', req.body);
+    if (avatar) {
+      user.avatar = avatar;
+    } else {
+      if (typeof biography == 'string') {
+        user.biography = biography;
+      }
+      user.fullName = fullName;
+      user.location = location;
+      user.occupation = occupation;
+      user.username = username;
+    }
+
+    await user.save();
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+};
+
 const follow = async (req, res) => {
   try {
-    const { userId } = req.body;
     const followingId = req.params.id;
+    const { userId } = req.body;
+    console.log('followingId', followingId);
+    console.log('userId', userId);
 
     const existingFollow = await Follow.find({ userId, followingId });
 
@@ -122,32 +154,10 @@ const follow = async (req, res) => {
   }
 };
 
-const updateUser = async (req, res) => {
-  try {
-    const { userId, biography } = req.body;
-
-    const user = await User.findById(userId);
-
-    if (!user) {
-      throw new Error('User does not exist');
-    }
-
-    if (typeof biography == 'string') {
-      user.biography = biography;
-    }
-
-    await user.save();
-
-    return res.status(200).json({ success: true });
-  } catch (err) {
-    return res.status(400).json({ error: err.message });
-  }
-};
-
 const unfollow = async (req, res) => {
   try {
-    const { userId } = req.body;
     const followingId = req.params.id;
+    const { userId } = req.body;
 
     const existingFollow = await Follow.find({ userId, followingId });
 

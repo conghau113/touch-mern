@@ -20,7 +20,7 @@ export default React.forwardRef(function PrimaryDateRangePicker(
   return (
     <RangePicker
       ref={ref}
-      className={tw('w-full border-blue-20 py-3', className)}
+      className={tw('w-full border-main-purple py-3', className)}
       placeholder={['Chọn ngày', 'Chọn ngày']}
       format={['DD/MM/YYYY', 'DD/MM/YYYY']}
       {...restProps}

@@ -4,7 +4,7 @@ import React from 'react';
 import { tw } from '../../../utils/classUtil';
 import { convertFullNameToImageName } from '../../../utils/convertUtil';
 
-type Variant = 'name' | 'avatar-qna' | 'image';
+type Variant = 'name' | 'avatar-qna' | 'image' | 'avatar';
 
 interface PrimaryAvatarProps extends AvatarProps {
   variant?: Variant;
@@ -43,6 +43,18 @@ export default React.forwardRef(function PrimaryAvatar(
             className
           )}
           src={`https://robohash.org/${username}`}
+          {...restProps}
+        />
+      );
+    }
+    case 'avatar': {
+      return (
+        <Avatar
+          className={tw(
+            'flex h-12 w-12 cursor-pointer select-none items-center justify-center rounded-full bg-gray-50',
+            className
+          )}
+          src={username}
           {...restProps}
         />
       );

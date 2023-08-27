@@ -13,7 +13,7 @@ export default React.forwardRef(function PrimaryDatePicker(props: PrimaryDatePic
   return (
     <DatePicker
       ref={ref}
-      className={tw('w-full border-blue-20 py-3', className)}
+      className={tw('w-full border-main-purple py-3', className)}
       placeholder='Chọn ngày'
       format='DD/MM/YYYY'
       showToday={false}

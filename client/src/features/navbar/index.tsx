@@ -1,16 +1,18 @@
 import { BellFilled, CloseCircleFilled, MessageFilled, QuestionCircleFilled, WechatFilled } from '@ant-design/icons';
-import { Dropdown, Image, Menu, MenuProps, Space, Typography } from 'antd';
+import { Dropdown, Image, Menu, MenuProps, message, Space, Typography } from 'antd';
 import MenuItem from 'antd/es/menu/MenuItem';
 import _ from 'lodash';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from 'use-media-antd-query';
+import { getUser } from '../../apis/service/users';
 import logo from '../../assets/logo_touch.png';
 import PrimaryButton from '../../components/custom/button/PrimaryButton';
 import PrimaryInput from '../../components/custom/input/PrimaryInput';
 import PrimarySelect from '../../components/custom/select/PrimarySelect';
 import SharedAvatarAuthUser from '../../components/shared/SharedAvatar';
 import { isLoggedIn, logoutUser } from '../../helper/authhelper';
+import useUserStore from '../../state/useUserStore';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -18,9 +20,20 @@ const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState<boolean>(false);
   const navigate = useNavigate();
   const user = isLoggedIn();
-  const username = user && isLoggedIn().username;
+  const username: string = user && isLoggedIn().username;
   const [search, setSearch] = useState('');
   const [searchOpacity, setSearchOpacity] = useState('opacity-80');
+  const [profile, setProfile] = useState<any>(null);
+  const { setUser } = useUserStore();
+
+  async function fetchUser() {
+    const data = await getUser({ id: username });
+    if (data.error) {
+      message.error(data.error);
+    } else {
+      setProfile(data);
+    }
+  }
 
   const isNonMobileScreens = useMediaQuery() !== 'xs';
 
@@ -34,19 +47,29 @@ const Navbar = () => {
     logoutUser();
     navigate('/login');
   };
+  useEffect(() => {
+    if (username) {
+      fetchUser();
+    }
+  }, [username]);
+  useEffect(() => {
+    if (profile) {
+      setUser({ avatar: profile?.user?.avatar?.[0]?.avatar?.[0]?.url });
+    }
+  }, [profile]);
 
   return (
     <div className='flex items-center justify-between w-full bg-main-purple shadow-md fixed z-50'>
       <Space className='flex w-4/12 items-center justify-center'>
         <div
           onClick={() => navigate('/')}
-          className='flex items-center cursor-pointer justify-center h-10 w-10 rounded-full bg-main-light'
+          className='flex items-center cursor-pointer justify-center h-10 w-10 rounded-full bg-white'
         >
           <Image preview={false} width={30} src={logo} />
         </div>
         <Typography
           onClick={() => navigate('/')}
-          className='font-bold text-[40px] text-main-light  text-center cursor-pointer'
+          className='font-bold text-[40px] text-white  text-center cursor-pointer'
         >
           TOUCH!
         </Typography>
@@ -54,7 +77,7 @@ const Navbar = () => {
       {isNonMobileScreens && (
         <div className='rounded-lg flex items-center justify-between gap-3 py-1 px-4 w-5/12'>
           <PrimaryInput
-            className={`rounded-full h-10 bg-main-light ${searchOpacity}`}
+            className={`rounded-full h-10 bg-white ${searchOpacity}`}
             variant='search-prefix'
             value={search}
             allowClear
@@ -80,15 +103,21 @@ const Navbar = () => {
             )}
           </PrimaryButton> */}
           <div className='flex items-center opacity-90 gap-2'>
-            <WechatFilled className='text-xl shadow-lg text-main-light cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
-            <BellFilled className='text-lg shadow-lg text-main-light cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
-            <QuestionCircleFilled className='text-lg shadow-lg text-main-light cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
+            <WechatFilled
+              onClick={() => {
+                navigate('/messenger');
+              }}
+              className='text-xl shadow-lg text-white cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue'
+            />
+            <BellFilled className='text-lg shadow-lg text-white cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
+            <QuestionCircleFilled className='text-lg shadow-lg text-white cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
           </div>
 
           <Dropdown
             className='cursor-pointer mr-12'
             placement='bottomRight'
             arrow
+            trigger={['click']}
             overlay={
               <Menu
                 items={
@@ -109,11 +138,14 @@ const Navbar = () => {
               />
             }
           >
-            <Space onClick={() => navigate(`/users/${username}`)}>
-              <Typography.Text className='text-main-light text-bold'>
-                {_.size(username) ? `${username}` : 'no user'}
+            <Space>
+              <Typography.Text className='text-white text-bold flex items-center'>
+                {_.size(username) ? `#${username}` : 'no user'}
               </Typography.Text>
-              <SharedAvatarAuthUser />
+              <SharedAvatarAuthUser
+                avatar={!!_.size(profile?.user?.avatar) ? profile?.user?.avatar?.[0]?.avatar?.[0]?.url : undefined}
+                userName={username}
+              />
             </Space>
           </Dropdown>
         </div>

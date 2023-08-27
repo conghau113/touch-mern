@@ -81,19 +81,18 @@ export default function SharedModalLike({ postId, isOpen, setOpen }: SharedModal
       closable
       centered
     >
-      <Divider className='my-4' />
+      <Divider className='my-4 bg-main-purple' />
       {_.map(userLikes, (item) => {
         const { username } = item ?? {};
         return (
           <PrimaryCard
-            bordered={false}
             onClick={() => navigate(`/users/${username}`)}
             variant='no-spacing'
-            className='px-2 py-1 hover:shadow-md cursor-pointer border-main-purple mt-2 rounded-xl shadow-sm'
+            className='p-2 hover:shadow-md cursor-pointer border-main-purple mt-2 rounded-xl'
           >
             <div className='w-full flex items-center'>
               <SharedAvatarAuthUser className='h-8 w-8' userName={username} />
-              <Typography>{username}</Typography>
+              <Typography className='ml-2'>#{username}</Typography>
               {/* <Space className='flex items-end justify-end'>
                 <PrimaryButton variant='primary'>View</PrimaryButton>
               </Space> */}

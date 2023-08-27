@@ -142,7 +142,7 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
           onChange={onChange}
           {...restProps}
           className={tw(
-            `(className, [&_.ant-upload.ant-upload-btn]:rounded-lg [&_.ant-upload.ant-upload-btn]:bg-white [&_.ant-upload.ant-upload-drag]:border-blue-20 ${
+            `(className, [&_.ant-upload.ant-upload-btn]:rounded-lg [&_.ant-upload.ant-upload-btn]:bg-white [&_.ant-upload.ant-upload-drag]:border-main-purple ${
               isUploadImage ? '[&_.ant-upload-btn]:pt-9' : ''
             }`,
             className

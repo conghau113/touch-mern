@@ -18,7 +18,7 @@ export default function SharedTrendingPost() {
     const data = await getPosts(user && user.token, query);
     const topPosts = [];
     if (data && data.data) {
-      for (let i = 0; i < 3 && i < data.data.length; i++) {
+      for (let i = 0; i < 5 && i < data.data.length; i++) {
         topPosts.push(data.data[i]);
       }
     }
@@ -30,16 +30,16 @@ export default function SharedTrendingPost() {
     fetchPosts();
   }, []);
   return (
-    <PrimaryCard className='bg-main-purple  border-main-light  p-4 pt-2 '>
+    <PrimaryCard className='bg-main-purple  border-white  p-4 pt-2 '>
       <Space>
-        <Typography className='text-lg flex items-center gap-2 font-medium text-main-light'>
-          {/* <Space className='bg-main-light w-6 h-6 rounded-full flex items-center justify-center'> */}
-          <StarFilled className='text-main-light text-lg' />
+        <Typography className='text-lg flex items-center gap-2 font-medium text-white'>
+          {/* <Space className='bg-white w-6 h-6 rounded-full flex items-center justify-center'> */}
+          <StarFilled className='text-white text-lg' />
           {/* </Space> */}
           <span>Top trending posts</span>
         </Typography>
       </Space>
-      <Divider className='my-2 bg-main-light' />
+      <Divider className='my-2 bg-white' />
       <Row gutter={[12, 16]} className='mt-4'>
         {!loading ? (
           _.size(posts) > 0 ? (
@@ -58,7 +58,7 @@ export default function SharedTrendingPost() {
         ) : (
           <Col span={24}>
             <div className='mt-2 flex justify-center w-full h-40 items-center'>
-              <Spin className='[&_.ant-spin-dot-item]:bg-main-light' size='default' spinning={loading} />
+              <Spin className='[&_.ant-spin-dot-item]:bg-white' size='default' spinning={loading} />
             </div>
           </Col>
         )}

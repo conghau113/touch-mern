@@ -15,6 +15,10 @@ const UserSchema = new mongoose.Schema(
         message: 'Must contain no spaces',
       },
     },
+    avatar: {
+      type: Array,
+      required: true,
+    },
     fullName: {
       type: String,
       required: true,
@@ -37,6 +41,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      match: [
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+        'Please provide a valid email',
+      ],
       validate: [isEmail, 'Must be valid email address'],
     },
     password: {

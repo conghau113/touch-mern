@@ -1,6 +1,8 @@
+import _ from 'lodash';
 import { Params } from 'react-router-dom';
+import { imageUpload } from '../../utils/imageUpload';
 
-const BASE_URL = 'http://localhost:3001/' || 'https://touch-mern.vercel.app/';
+const BASE_URL = 'http://localhost:4000/';
 
 const getUserLikedPosts = async (likerId: string, token: any, query: any) => {
   try {
@@ -60,7 +62,12 @@ const getUserLikes = async (postId: string, anchor: any) => {
 };
 
 const createPost = async (post: any, user: { token: any }) => {
+  let media: { public_id: any; url: any }[] = [];
   try {
+    const { image, title, content } = post ?? {};
+    if (!!_.size(image?.fileList)) {
+      media = await imageUpload(image?.fileList);
+    }
     const res = await fetch(BASE_URL + 'api/posts', {
       method: 'POST',
       headers: {
@@ -68,7 +75,7 @@ const createPost = async (post: any, user: { token: any }) => {
         'Content-Type': 'application/json',
         'x-access-token': user.token,
       },
-      body: JSON.stringify(post),
+      body: JSON.stringify({ content, title, image: media }),
     });
     return await res.json();
   } catch (err) {
@@ -77,7 +84,12 @@ const createPost = async (post: any, user: { token: any }) => {
 };
 
 const updatePost = async (postId: string, user: { token: any }, data: any) => {
+  let media: { public_id: any; url: any }[] = [];
   try {
+    const { image, content, title } = data ?? {};
+    if (!!_.size(image?.fileList)) {
+      media = await imageUpload(image?.fileList);
+    }
     const res = await fetch(BASE_URL + 'api/posts/' + postId, {
       method: 'PATCH',
       headers: {
@@ -85,7 +97,7 @@ const updatePost = async (postId: string, user: { token: any }, data: any) => {
         'Content-Type': 'application/json',
         'x-access-token': user.token,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ content, title, image: media }),
     });
     return res.json();
   } catch (err) {

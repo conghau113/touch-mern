@@ -21,8 +21,8 @@ export default function Backdrop() {
   return isOpenBackdrop ? (
     <div className='preloader'>
       <Spin
-        className='text-main-light  
-        [&_.ant-spin-dot-item]:bg-main-light
+        className='text-main-purple
+        [&_.ant-spin-dot-item]:bg-main-purple
         [&_.ant-spin-dot-item]:shadow-xl
         '
         tip='Loading ...'

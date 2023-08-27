@@ -1,11 +1,14 @@
-import { Col, FloatButton, message, Row, Spin, Typography } from 'antd';
+import { Col, FloatButton, message, Row, Spin, Typography, UploadFile } from 'antd';
+import { RcFile } from 'antd/es/upload';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useSearchParams } from 'react-router-dom';
 import { createPost, deletePost, getPosts, getUserLikedPosts, updatePost } from '../../apis/service/posts';
+import { getUser } from '../../apis/service/users';
 import Backdrop from '../../components/custom/backdrop/Backdrop';
 import PrimaryCard from '../../components/custom/card/PrimaryCard';
+import PrimaryStaticModal from '../../components/custom/modal/PrimaryStaticModal';
 import SharedFindUsers from '../../components/shared/SharedFindUsers';
 import SharedPostCard from '../../components/shared/SharedPostCard';
 import SharedPostModal from '../../components/shared/SharedPostModal';
@@ -17,6 +20,8 @@ import { isLoggedIn } from '../../helper/authhelper';
 import useBackdropStore from '../../state/useBackdropStore';
 import usePostStore from '../../state/usePostStore';
 import useSelectedTypePostStore from '../../state/useSelectedTypePostStore';
+import useUserStore from '../../state/useUserStore';
+import { getBase64 } from '../../utils/fileUtil';
 import Navbar from '../navbar';
 import MyPostWidget from './components/MyPostWidget';
 
@@ -95,35 +100,27 @@ const HomePage = (props: HomePageProps) => {
     setLoading(false);
     setOpenBackdrop(false);
     if (_.size(query.search)) {
-      setPosts(data?.data);
+      setPosts(_.flatten([posts, data?.data]));
       setCount(data.count);
     } else {
-      if (!data.error) {
+      if (!data?.error) {
         setPosts([...posts, ...data.data]);
       }
     }
   };
 
-  const handleFetchPostCreate = async () => {
-    setOpenBackdrop(true);
-    const query = {
-      sortBy: selectedPostValue,
-    };
-    const data = await getPosts(user && user.token, query);
-    if (!data.error) {
-      setOpenBackdrop(false);
-      setPosts([...data.data]);
-      setCount(data.count);
-    } else {
-      setOpenBackdrop(false);
-    }
-  };
-
   const handelSubmitPostModal = async (values: any) => {
+    console.log('valuesvalues::', values);
     setOpenBackdrop(true);
+    const { title, content, image } = values ?? {};
+    const body = {
+      title,
+      content,
+      image,
+    };
     const data = await (_.includes(EPostModal.Create, modePostModal)
-      ? createPost(values, isLoggedIn())
-      : updatePost(postValues._id, isLoggedIn(), { ...values }));
+      ? createPost(body, isLoggedIn())
+      : updatePost(postValues._id, isLoggedIn(), body));
     if (data && data.error) {
       setOpenBackdrop(false);
       message.error(data.error);
@@ -142,9 +139,9 @@ const HomePage = (props: HomePageProps) => {
         message.success('Update post successful!');
       }
       setOpenPostModal(false);
-      setOpenBackdrop(false);
       setEffect(!effect);
     }
+    setOpenBackdrop(false);
   };
 
   const handleDelecard = async (_id: string) => {
@@ -178,47 +175,56 @@ const HomePage = (props: HomePageProps) => {
           </Col>
         ) : null}
         <Col span={24} className={`${!propfile ? 'mt-16 px-12' : 'px-4'} mb-4`}>
-          <Row gutter={[24, 12]} className='pt-4'>
+          <Row gutter={[32, 12]}>
             {!propfile ? (
-              <Col span={6}>
+              <Col span={7} className='mt-4'>
                 <SharedSortSelectPost sorts={sorts} />
                 <div className='mt-4 w-full'>
                   <SharedTrendingPost />
                 </div>
               </Col>
             ) : null}
-            <Col span={!propfile ? 12 : 24}>
+            <Col span={!propfile ? 10 : 24}>
               {!_.includes(props.contentType, EContentType.Liked)
                 ? (isCreatePost || isCreatePost === undefined) && (
-                    <MyPostWidget username={username} onClick={() => setOpenPostModal(true)} />
+                    <div className='my-4'>
+                      <MyPostWidget username={username} onClick={() => setOpenPostModal(true)} />
+                    </div>
                   )
                 : null}
               {searchExists && (
                 <div className='mt-4'>
-                  <Typography className='text-main-light'>Showing results for "{search.get('search')}"</Typography>
-                  <Typography className='text-main-light'>{count} results found</Typography>
+                  <Typography className='text-main-purple'>Showing results for "{search.get('search')}"</Typography>
+                  <Typography className='text-main-purple'>{count} results found</Typography>
                 </div>
               )}
               <Row gutter={[12, 16]} className='mt-4'>
                 {_.map(posts, (post, index) => {
                   return (
                     <Col span={24} key={index}>
-                      <SharedPostCard post={post} postId={post._id} onDeleteCard={handleDelecard} />
+                      <SharedPostCard
+                        fetchPost={fetchPosts}
+                        post={post}
+                        postId={post._id}
+                        onDeleteCard={handleDelecard}
+                      />
                     </Col>
                   );
                 })}
               </Row>
               {loading && (
                 <div className='mt-2 flex justify-center'>
-                  <Spin className='[&_.ant-spin-dot-item]:bg-main-light' size='default' spinning={loading} />
+                  <Spin className='[&_.ant-spin-dot-item]:bg-main-purple' size='default' spinning={loading} />
                 </div>
               )}
               {!loading && _.size(posts) > 0 && <div ref={ref} />}
 
-              {end && <Typography className='text-center mt-2 text-main-light'>All posts have been viewed</Typography>}
+              {end && (
+                <Typography className='text-center mt-2 text-main-purple'>All posts have been viewed!</Typography>
+              )}
             </Col>
             {!propfile ? (
-              <Col span={6}>
+              <Col span={7} className='mt-4'>
                 <SharedFindUsers />
               </Col>
             ) : null}
@@ -230,6 +236,7 @@ const HomePage = (props: HomePageProps) => {
         title={_.includes(EPostModal.Update, modePostModal) ? 'Update post' : 'Create post'}
         onSubmit={handelSubmitPostModal}
       />
+      <PrimaryStaticModal />
       <Backdrop />
       <FloatButton.BackTop />
     </>

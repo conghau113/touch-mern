@@ -38,7 +38,7 @@ export default React.forwardRef(function PrimaryTextArea(props: PrimaryTextAreaP
         <TextArea
           ref={ref}
           className={tw(
-            'border-blue-19 border-opacity-20 text-sm font-normal placeholder-black-1 scrollbar scrollbar--horizontal placeholder:text-sm placeholder:opacity-40',
+            'border-main-purple border-opacity-60 border-dashed text-sm font-normal placeholder-black-1 scrollbar scrollbar--horizontal placeholder:text-sm placeholder:opacity-40',
             className
           )}
           placeholder='Nhập nội dung'

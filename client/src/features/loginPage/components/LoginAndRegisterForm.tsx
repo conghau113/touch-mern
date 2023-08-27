@@ -2,76 +2,24 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { Col, Divider, Form, Input, message, Row, Typography } from 'antd';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login, signup } from '../../../apis/service/users';
 import PrimaryButton from '../../../components/custom/button/PrimaryButton';
 import PrimaryForm from '../../../components/custom/form/PrimaryForm';
 import PrimaryInput from '../../../components/custom/input/PrimaryInput';
 import { loginUser } from '../../../helper/authhelper';
-import { setLogin } from '../../../state';
+import useUserStore from '../../../state/useUserStore';
 import { ELoginEnum } from '../enums/LoginEnum';
-import useAuthStore from '../store/useAuthStore';
 
 const LoginAndRegisterForm = () => {
   const [form] = Form.useForm();
   const [pageType, setPageType] = useState<ELoginEnum>(ELoginEnum.Login);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+
+  const { setUser } = useUserStore();
 
   const isLogin = _.includes(ELoginEnum.Login, pageType);
   const isRegister = _.includes(ELoginEnum.Register, pageType);
-
-  const { setUserAuth } = useAuthStore();
-
-  // xu ly keo tha file
-  // const handleDrop: UploadProps['onDrop'] = (e: any) => {
-  //   const { name } = e.dataTransfer.files[0];
-  //   setDroppedFileName(name);
-  // };
-
-  // // format kieu du lieu file khi upload
-  // function formatBytes(bytes: number, decimals = 2) {
-  //   return `${(bytes / 1024 / 1024).toFixed(decimals)} MB`;
-  // }
-
-  // // xu ly onChange file
-  // const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-  //   const file = newFileList?.[0];
-  //   const { size = 0, name } = file;
-  //   setDroppedFileName(name);
-  //   setDroppedFileSize(formatBytes(size));
-  //   if (size && size > 20 * 1024 * 1024) {
-  //     setStatus('error');
-  //     // message.error('Dung lượng file không được quá 20MB');
-  //     return false;
-  //   }
-  //   if (name && !isAcceptanceFile(name)) {
-  //     setStatus('error');
-  //     // message.error(`Đính kèm không hợp lệ. Chỉ chập nhận định dạng ${_.join(['jpg', 'jpeg', 'png'], ', ')}`);
-  //     return false;
-  //   } else {
-  //     setStatus('done');
-  //   }
-  // };
-
-  // // xu ly uploadfile props
-  // const uploadProps: UploadProps = {
-  //   multiple: false,
-  //   onChange: handleChange,
-  //   onDrop: handleDrop,
-  //   beforeUpload: (file) => {
-  //     if (file.size && file.size > 20 * 1024 * 1024) {
-  //       // message.error('Dung lượng file không được quá 20MB');
-  //       return false;
-  //     }
-  //     if (file.name && !isAcceptanceFile(file.name)) {
-  //       // message.error('File không hợp lệ');
-  //       return false;
-  //     }
-  //     return false;
-  //   },
-  // };
 
   const handleRegister = async (values: any) => {
     const data = await signup(values);
@@ -91,6 +39,7 @@ const LoginAndRegisterForm = () => {
       message.error(data.error);
     } else {
       loginUser(data);
+      setUser({ username: data?.username });
       navigate('/');
     }
   };

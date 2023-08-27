@@ -20,7 +20,7 @@ export default React.forwardRef(function PrimaryInput(props: PrimaryInputProps, 
           ref={ref}
           allowClear
           className={tw(
-            ` h-12 border-blue-19 border-opacity-20 text-sm [&_.ant-input]:bg-transparent [&_input]:placeholder-dark-12`,
+            ` h-12 border-main-purple border-opacity-20 text-sm [&_.ant-input]:bg-transparent [&_input]:placeholder-dark-12`,
             className
           )}
           suffix={
@@ -51,7 +51,10 @@ export default React.forwardRef(function PrimaryInput(props: PrimaryInputProps, 
       return (
         <Input
           ref={ref}
-          className={tw('h-12 text-sm [&_.ant-input]:bg-transparent [&_input]:placeholder-dark-12', className)}
+          className={tw(
+            'h-12 text-sm border-dashed border-main-purple border-opacity-60 [&_.ant-input]:bg-transparent [&_input]:placeholder-dark-12',
+            className
+          )}
           {...restProps}
         />
       );
