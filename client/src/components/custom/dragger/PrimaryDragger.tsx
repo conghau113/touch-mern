@@ -62,7 +62,7 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
                     onHandleClickRemoveFile?.();
                   }}
                 >
-                  Xóa file
+                  Delete file
                 </Text>
               </Typography>
             </div>
@@ -72,7 +72,7 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
                 typographyClassName='text-dark-1 text-sm font-semibold'
                 className='h-10 bg-light-17'
               >
-                Thay tệp
+                Replace file
               </PrimaryButton>
             </div>
           </div>
@@ -105,7 +105,7 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
                       onHandleClickRemoveFile?.();
                     }}
                   >
-                    Xóa file
+                    Delete file
                   </Text>
                   {isUploadImage ? (
                     <Text
@@ -116,7 +116,7 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
                         onHandleClickPreviewFile?.();
                       }}
                     >
-                      Xem trước
+                      Preview
                     </Text>
                   ) : null}
                 </div>
@@ -128,7 +128,7 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
                 typographyClassName='text-dark-1 text-sm font-semibold'
                 className='h-10 bg-light-17'
               >
-                Thay tệp
+                Replace file
               </PrimaryButton>
             </div>
           </div>
@@ -159,7 +159,7 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
                     className={`flex flex-col ${isUploadImage ? 'items-center' : 'items-start'} justify-center`}
                   >
                     <Title className='m-0 mt-4 text-base font-semibold'>Thêm ảnh bài viết</Title>
-                    <Text className={`mt-1 text-xs font-normal text-dark-7`}>Nhấp hoặc kéo tệp vào đây để tải lên</Text>
+                    <Text className={`mt-1 text-xs font-normal text-dark-7`}>Click or drag files here to upload</Text>
                   </Typography>
                 </>
               ) : (
@@ -168,11 +168,9 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
                   <Typography
                     className={`flex flex-col ${isUploadImage ? 'items-center' : 'items-start'} justify-center`}
                   >
-                    <Title className='text-black m-0 text-base font-semibold'>
-                      Nhấp hoặc kéo tệp vào đây để tải lên
-                    </Title>
+                    <Title className='text-black m-0 text-base font-semibold'>Click or drag files here to upload</Title>
                     <Text className={`text-black my-1.5 text-xs font-normal opacity-60`}>
-                      Chỉ được tải lên 1 file với các định dạng: .jpeg hoặc .png, .jpg
+                      Only upload 1 file with different formats: .jpeg hoặc .png, .jpg
                     </Text>
                   </Typography>
                 </>
@@ -185,7 +183,7 @@ export default React.forwardRef(function PrimaryDragger(props: PrimaryDraggerPro
                   typographyClassName='text-dark-1 text-sm font-semibold'
                   className='h-10 bg-light-17'
                 >
-                  Chọn tệp
+                  Select file
                 </PrimaryButton>
               </div>
             ) : null}

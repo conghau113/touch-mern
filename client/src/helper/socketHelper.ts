@@ -6,7 +6,7 @@ export let socket: Socket;
 export const initiateSocketConnection = () => {
   const user = isLoggedIn();
 
-  socket = io(BASE_URL, {
+  socket = io('http://localhost:4000/', {
     auth: {
       token: user && user.token,
     },

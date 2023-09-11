@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { EPostModal } from '../../enums/EPostModal';
 import usePostStore from '../../state/usePostStore';
+import useTrendingPostStore from '../../state/useTrendingPostStore';
 import { getBase64, isAcceptanceFile, isAcceptanceFileQuestion, isImageFile } from '../../utils/fileUtil';
 import { openLink } from '../../utils/linkUtil';
 import PrimaryButton from '../custom/button/PrimaryButton';
@@ -24,7 +25,7 @@ export default function SharedPostModal(props: SharedPostModalProps) {
   const { title, onSubmit, isOpen } = props ?? {};
   const [form] = Form.useForm();
 
-  const { setOpenPostModal, postValues, modePostModal, setModePostModal } = usePostStore();
+  const { setOpenPostModal, postValues, setPostValues, modePostModal, setModePostModal } = usePostStore();
   const [droppedFileName, setDroppedFileName] = useState<string>('');
   const [droppedFileSize, setDroppedFileSize] = useState<string>('');
   const [status, setStatus] = useState<string>('');
@@ -32,6 +33,8 @@ export default function SharedPostModal(props: SharedPostModalProps) {
   const [previewImage, setPreviewImage] = useState('');
   const [previewTitle, setPreviewTitle] = useState<any>('');
   const [initialFieldList, setFieldList] = useState<any[]>([]);
+
+  const { setEdit } = useTrendingPostStore();
 
   // xu ly keo tha file
   const handleDrop: UploadProps['onDrop'] = (e: any) => {
@@ -95,12 +98,12 @@ export default function SharedPostModal(props: SharedPostModalProps) {
     setFieldList(newFileList);
     if (size && size > 20 * 1024 * 1024) {
       setStatus('error');
-      // message.error('Dung lượng file không được quá 20MB');
+      // message.error('File size must not exceed 20MB');
       return false;
     }
     if (name && !isAcceptanceFile(name)) {
       setStatus('error');
-      // message.error(`Đính kèm không hợp lệ. Chỉ chập nhận định dạng ${_.join(['jpg', 'jpeg', 'png'], ', ')}`);
+      // message.error(`Attachment file is invalid. Only accepted formats ${_.join(['jpg', 'jpeg', 'png'], ', ')}`);
       return false;
     } else {
       setStatus('done');
@@ -116,7 +119,7 @@ export default function SharedPostModal(props: SharedPostModalProps) {
     onDrop: handleDrop,
     beforeUpload: (file) => {
       if (file.size && file.size > 20 * 1024 * 1024) {
-        // message.error('Dung lượng file không được quá 20MB');
+        // message.error('File size must not exceed 20MB');
         return false;
       }
       if (file.name && !isAcceptanceFile(file.name)) {
@@ -128,10 +131,14 @@ export default function SharedPostModal(props: SharedPostModalProps) {
   };
 
   useEffect(() => {
+    if (isOpen) {
+      setEdit(false);
+      setStatus('normal');
+    }
     if (!isOpen) {
       setModePostModal(EPostModal.Create);
       setStatus('normal');
-      form.resetFields();
+      // form.resetFields();
     }
     if (!!_.size(postValues?.image) && isOpen) {
       console.log('postValues?.image:', postValues?.image);
@@ -155,6 +162,7 @@ export default function SharedPostModal(props: SharedPostModalProps) {
       closable
       onCancel={() => {
         setOpenPostModal(false);
+        setPostValues({});
       }}
       title={<Typography className='flex items-center justify-start text-base text-main-purple'>{title}</Typography>}
       footer={null}
@@ -196,7 +204,7 @@ export default function SharedPostModal(props: SharedPostModalProps) {
                 {
                   validator: (__, value) => {
                     if (!value) {
-                      return Promise.reject(new Error('Tiêu đề không được để trống'));
+                      return Promise.reject(new Error('Title cannot be empty!'));
                     }
                     return Promise.resolve();
                   },
@@ -215,7 +223,7 @@ export default function SharedPostModal(props: SharedPostModalProps) {
                 {
                   validator: (__, value) => {
                     if (!value) {
-                      return Promise.reject(new Error('Nội dung không được để trống'));
+                      return Promise.reject(new Error('Content cannot be empty!'));
                     }
                     return Promise.resolve();
                   },
@@ -243,12 +251,12 @@ export default function SharedPostModal(props: SharedPostModalProps) {
                     //   return Promise.reject('Vui lòng đính kèm file!');
                     // }
                     if (Number.isInteger(getSizeFile) && getSizeFile > 0) {
-                      return await Promise.reject(new Error('Dung lượng file không được quá 20MB!'));
+                      return await Promise.reject(new Error('File size must not exceed 20MB!'));
                     }
                     if (name && !isAcceptanceFileQuestion(name)) {
                       return await Promise.reject(
                         new Error(
-                          `Đính kèm không hợp lệ. Chỉ chập nhận định dạng ${_.join(['jpg', 'jpeg', 'png'], ', ')}!`
+                          `Attachment file is invalid. Only accepted formats ${_.join(['jpg', 'jpeg', 'png'], ', ')}!`
                         )
                       );
                     }
@@ -264,12 +272,14 @@ export default function SharedPostModal(props: SharedPostModalProps) {
                 droppedFileSize={droppedFileSize}
                 fileList={initialFieldList}
                 onHandleClickRemoveFile={() => {
-                  form.setFieldValue('file', undefined);
+                  form.setFieldValue('image', undefined);
                   setStatus('normal');
                   setDroppedFileSize('');
                   setDroppedFileName('');
-                  form.validateFields(['file']);
+                  form.validateFields(['image']);
                   setPreviewOpen(false);
+                  console.log('postValues:;', postValues);
+                  setPostValues({ ...postValues, image: [] });
                 }}
                 maxCount={1}
                 variant={`${status === 'error' ? 'failed' : status === 'done' ? 'success' : 'normal'}`}

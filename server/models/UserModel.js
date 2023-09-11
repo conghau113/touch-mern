@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minLength: [8, 'Must be at least 8 characters long'],
+      minLength: [6, 'Must be at least 6 characters long'],
     },
     biography: {
       type: String,
@@ -61,6 +61,18 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    followers: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: 'user',
+      },
+    ],
+    following: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: 'user',
+      },
+    ],
   },
   { timestamps: true }
 );

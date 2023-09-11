@@ -1,4 +1,6 @@
+import axios from 'axios';
 import _ from 'lodash';
+import useUserStore from '../../state/useUserStore';
 import { imageUpload } from '../../utils/imageUpload';
 
 const BASE_URL = 'http://localhost:4000/';
@@ -35,9 +37,52 @@ const login = async (user: any) => {
   }
 };
 
+const changePassword = async (user: { token: any }, data: any) => {
+  try {
+    const res = await fetch(BASE_URL + 'api/users/changePassword', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: user.token,
+        'x-access-token': user.token,
+      },
+      body: JSON.stringify({ ...data }),
+    });
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const forgotPassword = async (data: any) => {
+  try {
+    const res = await fetch(BASE_URL + 'api/users/forgotPassword', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...data }),
+    });
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const getUser = async (params: { id: string }) => {
   try {
     const res = await fetch(BASE_URL + 'api/users/' + params.id);
+    return res.json();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getAllUser = async () => {
+  try {
+    const res = await fetch(BASE_URL + 'api/users/getAllUser');
     return res.json();
   } catch (err) {
     console.log(err);
@@ -52,7 +97,6 @@ const getRandomUsers = async (query: any) => {
     console.log(err);
   }
 };
-
 const updateUser = async (user: any, data: any) => {
   let media: { public_id: any; url: any }[] = [];
   try {
@@ -74,10 +118,10 @@ const updateUser = async (user: any, data: any) => {
   }
 };
 
-const followUser = async (followingId: string, user: { token: any }) => {
+const followUser = async (followingId: string, user: any) => {
   try {
-    const res = await fetch(BASE_URL + 'api/users/follow/' + followingId, {
-      method: 'POST',
+    const res = await fetch(BASE_URL + `api/users/${followingId}/follow`, {
+      method: 'PATCH',
       headers: {
         'x-access-token': user.token,
       },
@@ -88,10 +132,10 @@ const followUser = async (followingId: string, user: { token: any }) => {
   }
 };
 
-const unFollow = async (followingId: string, user: { token: any }) => {
+const unFollow = async (followingId: string, user: any) => {
   try {
-    const res = await fetch(BASE_URL + 'api/users/unfollow/' + followingId, {
-      method: 'DELETE',
+    const res = await fetch(BASE_URL + `api/users/${followingId}/unfollow`, {
+      method: 'PATCH',
       headers: {
         'x-access-token': user.token,
       },
@@ -102,4 +146,22 @@ const unFollow = async (followingId: string, user: { token: any }) => {
   }
 };
 
-export { signup, login, getUser, getRandomUsers, updateUser, unFollow, followUser };
+export const patchDataAPI = async (url: string, post: any, token: any) => {
+  const res = await axios.patch(`/api/${url}`, post, {
+    headers: { Authorization: token },
+  });
+  return res;
+};
+
+export {
+  signup,
+  login,
+  changePassword,
+  getAllUser,
+  forgotPassword,
+  getUser,
+  getRandomUsers,
+  updateUser,
+  unFollow,
+  followUser,
+};

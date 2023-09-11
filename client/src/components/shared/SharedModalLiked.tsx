@@ -91,7 +91,11 @@ export default function SharedModalLike({ postId, isOpen, setOpen }: SharedModal
             className='p-2 hover:shadow-md cursor-pointer border-main-purple mt-2 rounded-xl'
           >
             <div className='w-full flex items-center'>
-              <SharedAvatarAuthUser className='h-8 w-8' userName={username} />
+              <SharedAvatarAuthUser
+                className='h-8 w-8'
+                avatar={!!_.size(item?.avatar) ? item?.avatar?.[0]?.avatar?.[0]?.url : undefined}
+                userName={username}
+              />
               <Typography className='ml-2'>#{username}</Typography>
               {/* <Space className='flex items-end justify-end'>
                 <PrimaryButton variant='primary'>View</PrimaryButton>

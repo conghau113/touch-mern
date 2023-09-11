@@ -16,6 +16,7 @@ import { isLoggedIn } from '../../../helper/authhelper';
 import useBackdropStore from '../../../state/useBackdropStore';
 import usePostStore from '../../../state/usePostStore';
 import useSelectedTypePostStore from '../../../state/useSelectedTypePostStore';
+import useTrendingPostStore from '../../../state/useTrendingPostStore';
 import Navbar from '../../navbar';
 import MyPostWidget from './MyPostWidget';
 
@@ -26,7 +27,8 @@ interface HomePageProps {
 }
 
 const HomePageContent = (props: HomePageProps) => {
-  const { isOpenPostModal, setOpenPostModal, setModePostModal, modePostModal, postValues } = usePostStore();
+  const { isOpenPostModal, setOpenPostModal, setPostValues, setModePostModal, modePostModal, postValues } =
+    usePostStore();
   const user = isLoggedIn();
   const username = user && isLoggedIn()?.username;
   const { setOpenBackdrop } = useBackdropStore();
@@ -43,6 +45,7 @@ const HomePageContent = (props: HomePageProps) => {
   const searchExists = search && search.get('search') && _.size(search.get('search')) > 0;
 
   const { selectedPostValue } = useSelectedTypePostStore();
+  const { setEdit } = useTrendingPostStore();
 
   const contentTypeSorts = {
     posts: {
@@ -114,9 +117,13 @@ const HomePageContent = (props: HomePageProps) => {
           }
           return post;
         });
-        setPosts(newPost);
+
+        // setPosts(newPost);
+        fetchPosts();
+        setEdit(true);
         message.success('Update post successful!');
       }
+      setPostValues({});
       setOpenPostModal(false);
       setOpenBackdrop(false);
       setEffect(!effect);
@@ -181,7 +188,12 @@ const HomePageContent = (props: HomePageProps) => {
                 {_.map(posts, (post, index) => {
                   return (
                     <Col span={24} key={index}>
-                      <SharedPostCard post={post} postId={post._id} onDeleteCard={handleDelecard} />
+                      <SharedPostCard
+                        fetchPost={fetchPosts}
+                        post={post}
+                        postId={post._id}
+                        onDeleteCard={handleDelecard}
+                      />
                     </Col>
                   );
                 })}

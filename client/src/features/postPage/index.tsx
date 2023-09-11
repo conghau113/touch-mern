@@ -13,6 +13,8 @@ import { EPostModal } from '../../enums/EPostModal';
 import { isLoggedIn } from '../../helper/authhelper';
 import useBackdropStore from '../../state/useBackdropStore';
 import usePostStore from '../../state/usePostStore';
+import useTrendingPostStore from '../../state/useTrendingPostStore';
+import ChatBoxContent from '../chatBox/chatBoxContent';
 import Navbar from '../navbar';
 import CommentPost from './components/CommentPost';
 
@@ -23,6 +25,8 @@ export default function PostPage() {
   const [post, setPost] = useState<any>({});
   const navigate = useNavigate();
   const { isOpenPostModal, setOpenPostModal, setModePostModal, modePostModal, postValues } = usePostStore();
+
+  const { setEdit } = useTrendingPostStore();
 
   const fetchPost = async () => {
     const data = await getPost(params.id, user && user.token);
@@ -40,6 +44,7 @@ export default function PostPage() {
       setOpenBackdrop(false);
       message.error(data.error);
     } else {
+      setEdit(true);
       message.success('Update post successful!');
       fetchPost();
       setOpenPostModal(false);
@@ -66,25 +71,27 @@ export default function PostPage() {
         </Col>
 
         <Col span={24} className='px-8'>
-          <Row gutter={[24, 0]} className='mt-20 '>
-            <Col span={6}>
-              <SharedTrendingPost />
-            </Col>
-            <Col span={12}>
+          <Row gutter={[40, 0]} className='mt-20'>
+            <Col span={14} className='ml-14'>
               {_.size(post) ? (
                 <>
-                  <SharedPostCard post={post} postId={post._id} onDeleteCard={handleDelecard} />
+                  <SharedPostCard fetchPost={fetchPost} post={post} postId={post._id} onDeleteCard={handleDelecard} />
                   <CommentPost fetchPost={fetchPost} />
                 </>
               ) : null}
             </Col>
-            <Col span={6}>
-              <SharedFindUsers />
+            <Col span={8}>
+              <SharedTrendingPost />
             </Col>
+
+            {/* <Col span={6}>
+              <SharedFindUsers />
+            </Col> */}
           </Row>
         </Col>
       </Row>
       <SharedPostModal isOpen={isOpenPostModal} title={'Update post'} onSubmit={handelSubmitPostModal} />
+      <ChatBoxContent />
       <PrimaryStaticModal />
       <Backdrop />
       <FloatButton.BackTop />

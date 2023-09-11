@@ -12,6 +12,7 @@ import PrimaryInput from '../../components/custom/input/PrimaryInput';
 import PrimarySelect from '../../components/custom/select/PrimarySelect';
 import SharedAvatarAuthUser from '../../components/shared/SharedAvatar';
 import { isLoggedIn, logoutUser } from '../../helper/authhelper';
+import useConversationStore from '../../state/useConversationStore';
 import useUserStore from '../../state/useUserStore';
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -22,9 +23,10 @@ const Navbar = () => {
   const user = isLoggedIn();
   const username: string = user && isLoggedIn().username;
   const [search, setSearch] = useState('');
-  const [searchOpacity, setSearchOpacity] = useState('opacity-80');
+  const [searchOpacity, setSearchOpacity] = useState('opacity-90');
   const [profile, setProfile] = useState<any>(null);
-  const { setUser } = useUserStore();
+  const { setUser, user: UserAuth } = useUserStore();
+  const { setCurrent } = useConversationStore();
 
   async function fetchUser() {
     const data = await getUser({ id: username });
@@ -52,8 +54,9 @@ const Navbar = () => {
       fetchUser();
     }
   }, [username]);
+
   useEffect(() => {
-    if (profile) {
+    if (!!_.size(profile?.user?.avatar)) {
       setUser({ avatar: profile?.user?.avatar?.[0]?.avatar?.[0]?.url });
     }
   }, [profile]);
@@ -81,36 +84,29 @@ const Navbar = () => {
             variant='search-prefix'
             value={search}
             allowClear
-            // onFocus={() => setSearchOpacity('opacity-unset')}
-            // onBlur={() => setSearchOpacity('opacity-80')}
+            onFocus={() => setSearchOpacity('opacity-unset')}
+            onBlur={() => setSearchOpacity('opacity-80')}
             onSubmit={handleSubmit}
             onPressEnter={handleSubmit}
             onClickSearchIcon={(e) => handleSubmit?.(e)}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder='Search...'
+            placeholder='Search posts...'
           />
         </div>
       )}
 
-      {/* DESKTOP NAV */}
       {isNonMobileScreens ? (
         <div className='flex gap-12 justify-end items-center w-4/12'>
-          {/* <PrimaryButton onClick={() => dispatch(setMode())}>
-            {theme.palette.mode === "dark" ? (
-              <DarkMode sx={{ fontSize: "25px" }} />
-            ) : (
-              <LightMode sx={{ color: dark, fontSize: "25px" }} />
-            )}
-          </PrimaryButton> */}
           <div className='flex items-center opacity-90 gap-2'>
             <WechatFilled
               onClick={() => {
+                setCurrent('');
                 navigate('/messenger');
               }}
               className='text-xl shadow-lg text-white cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue'
             />
             <BellFilled className='text-lg shadow-lg text-white cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
-            <QuestionCircleFilled className='text-lg shadow-lg text-white cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' />
+            {/* <QuestionCircleFilled className='text-lg shadow-lg text-white cursor-pointer p-1.5 hover:rounded-full border-2 border-transparent hover:border-white hover:bg-main-blue' /> */}
           </div>
 
           <Dropdown
@@ -143,7 +139,7 @@ const Navbar = () => {
                 {_.size(username) ? `#${username}` : 'no user'}
               </Typography.Text>
               <SharedAvatarAuthUser
-                avatar={!!_.size(profile?.user?.avatar) ? profile?.user?.avatar?.[0]?.avatar?.[0]?.url : undefined}
+                avatar={!!_.size(UserAuth?.avatar) ? UserAuth?.avatar : undefined}
                 userName={username}
               />
             </Space>

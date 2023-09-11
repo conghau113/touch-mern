@@ -15,7 +15,11 @@ export default function SharedAvatarGroup({ UserLikePreview }: SharedAvatarGroup
         const { username } = user;
         return (
           <Avatar key={username} className='flex items-center justify-center object-cover'>
-            <SharedAvatarAuthUser userName={username} className='scale-125' />
+            <SharedAvatarAuthUser
+              className='scale-125'
+              avatar={!!_.size(user?.avatar) ? user?.avatar?.[0]?.avatar?.[0]?.url : undefined}
+              userName={username}
+            />
           </Avatar>
         );
       })}

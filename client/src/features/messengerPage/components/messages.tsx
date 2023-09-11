@@ -1,10 +1,16 @@
-import { Divider, Typography } from 'antd';
+import { ArrowDownOutlined, WechatOutlined } from '@ant-design/icons';
+import { Divider, Space, Typography } from 'antd';
+import _ from 'lodash';
 import { Key, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getMessages, sendMessage } from '../../../apis/service/messages';
+import PrimaryButton from '../../../components/custom/button/PrimaryButton';
+import PrimaryCard from '../../../components/custom/card/PrimaryCard';
+import PrimaryEmpty from '../../../components/custom/empty/PrimaryEmpty';
 import SharedAvatarAuthUser from '../../../components/shared/SharedAvatar';
 import { isLoggedIn } from '../../../helper/authhelper';
-import { socket } from '../../../helper/socketHelper';
+import { disconnectSocket, initiateSocketConnection, socket } from '../../../helper/socketHelper';
+import useConversationStore from '../../../state/useConversationStore';
 import Message from './message';
 import SendMessage from './sendMessage';
 
@@ -14,17 +20,24 @@ interface MessagesProps {
   setConservant: any;
   setConversations: any;
   getConversation: any;
+  isBoxchat?: boolean;
 }
 
 export default function Messages(props: MessagesProps) {
+  const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const user = isLoggedIn();
-  const [messages, setMessages] = useState<any>(null);
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { setCurrent } = useConversationStore();
+  const [showFloatbuttonChat, setShowFloatButtonChat] = useState<boolean>(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const conversationsRef = useRef(props.conversations);
   const conservantRef = useRef(props.conservant);
   const messagesRef = useRef(messages);
+
   useEffect(() => {
     conversationsRef.current = props.conversations;
     conservantRef.current = props.conservant;
@@ -51,17 +64,12 @@ export default function Messages(props: MessagesProps) {
         setMessages(conversation.messages);
         return;
       }
-
       setLoading(true);
-
       const data = await getMessages(user, conversation._id);
-
       setDirection(data);
-
       if (data && !data.error) {
         setMessages(data);
       }
-
       setLoading(false);
     }
   };
@@ -94,23 +102,16 @@ export default function Messages(props: MessagesProps) {
     );
 
     newConversations.unshift(conversation);
-
     props.setConversations(newConversations);
 
     setMessages(newMessages);
-
     await sendMessage(user, newMessage, conversation.recipient._id);
-
-    socket.emit('send-message', conversation.recipient._id, user.username, content);
+    await socket.connect().emitWithAck('send-message', conversation.recipient._id, user.username, content);
   };
 
   const handleReceiveMessage = (senderId: any, username: string, content: string) => {
     const newMessage = { direction: 'to', content };
-
     const conversation = props.getConversation(conversationsRef.current, senderId);
-
-    console.log(username + ' ' + content);
-
     if (conversation) {
       let newMessages = [newMessage];
       if (messagesRef.current) {
@@ -127,9 +128,7 @@ export default function Messages(props: MessagesProps) {
       let newConversations = conversationsRef.current.filter(
         (conversationCompare: { _id: any }) => conversation._id !== conversationCompare._id
       );
-
       newConversations.unshift(conversation);
-
       props.setConversations(newConversations);
     } else {
       const newConversation = {
@@ -141,40 +140,93 @@ export default function Messages(props: MessagesProps) {
       };
       props.setConversations([newConversation, ...conversationsRef.current]);
     }
-
     scrollToBottom();
   };
 
   useEffect(() => {
-    socket.on('receive-message', handleReceiveMessage);
+    socket.connect().on('receive-message', handleReceiveMessage);
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   return props.conservant ? (
-    <div className='flex items-center gap-2 h-16 px-2'>
-      <SharedAvatarAuthUser avatar={props.conservant.username} />
-      <Typography>
-        <Link to={'/users/' + props.conservant.username}>
-          <b>{props.conservant.username}</b>
-        </Link>
-      </Typography>
-      <Divider />
-      <div className='h-[75vh]'>
-        <div className='p-2 overflow-y-auto ,ax-h-full flex flex-col-reverse'>
+    <div className='h-16 p-2 '>
+      <Space className='flex items-center h-12'>
+        <Space onClick={() => navigate(`/users/${props.conservant.username}`)}>
+          <SharedAvatarAuthUser
+            className='h-10 w-10 text-white'
+            avatar={!!_.size(props?.conservant?.avatar) ? props?.conservant?.avatar?.[0]?.avatar?.[0]?.url : undefined}
+            userName={props?.conservant?.username}
+          />
+        </Space>
+        <div className='ml-2 cursor-pointer' onClick={() => navigate(`/users/${props.conservant.username}`)}>
+          <Typography className='text-sm flex text-white items-center font-medium'>
+            {props.conservant.fullName}
+          </Typography>
+          <Typography className='text-xs flex text-white items-center font-normal'>
+            #{props.conservant.username}
+          </Typography>
+        </div>
+      </Space>
+      <div className={` ${props?.isBoxchat ? 'h-[350px]' : 'h-[65.5vh]'}  mb-1 rounded-lg bg-main-light bg-opacity-20`}>
+        <PrimaryCard
+          variant='no-style'
+          bordered={false}
+          onScroll={(e: React.UIEvent<HTMLElement>) => {
+            if (messagesContainerRef.current) {
+              const offsetHeight = e.currentTarget.scrollTop + e.currentTarget.offsetHeight;
+              if (offsetHeight > offsetHeight - offsetHeight / 8) {
+                setShowFloatButtonChat(false);
+              } else {
+                setShowFloatButtonChat(true);
+              }
+            }
+          }}
+          ref={messagesContainerRef}
+          className='p-2 h-full [&_.ant-card-body]:contents flex flex-col-reverse mt-2 scrollbar overflow-hidden scroll-smooth overflow-y-scroll'
+        >
           <div ref={messagesEndRef} />
           {messages.map((message: any, i: Key | null | undefined) => (
             <Message conservant={props.conservant} message={message} key={i} />
           ))}
-        </div>
+        </PrimaryCard>
+        {/* float button scroll to bottom */}
+        {showFloatbuttonChat && (
+          <PrimaryButton
+            onClick={() => {
+              if (messagesContainerRef.current) {
+                messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+              }
+            }}
+            className='absolute bg-white hover:text-main-purple hover:opacity-80 bottom-[70px] left-[48%] z-50 animate-bounce border-none shadow-lg'
+            shape='circle'
+            size='large'
+            icon={<ArrowDownOutlined className='opacity-60' />}
+          ></PrimaryButton>
+        )}
       </div>
-      <>
+      <div className='mt-2 '>
         <SendMessage onSendMessage={handleSendMessage} />
-        {scrollToBottom()}
-      </>
+      </div>
     </div>
   ) : (
-    <div className='h-full flex items-center justify-center'>
-      <Typography>PostIt Messenger</Typography>
-      <Typography color='secondary'>Privately message other users on PostIt</Typography>
+    <div className='h-full flex items-center justify-center flex-col'>
+      <PrimaryEmpty
+        image={
+          <div>
+            <WechatOutlined className='text-8xl' />
+          </div>
+        }
+        description={
+          <>
+            <Typography className='text-white mb-2 font-inter'>Messenger</Typography>
+            <Typography className='text-white font-inter font-light'>
+              Privately message other users on TOUCH!
+            </Typography>
+          </>
+        }
+      />
     </div>
   );
 }

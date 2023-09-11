@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 const defaultTheme = require('./node_modules/tailwindcss/defaultTheme');
+const plugin = require('tailwindcss/plugin');
 
 const colors = {
   accent: {
@@ -14,7 +15,8 @@ const colors = {
     9: '#999',
   },
   main: {
-    purple: '#36174D',
+    // purple: '#36174D',
+    purple: '#1c1835',
     pink: '#FF4778',
     light: '#F3EFFE',
     blue: '#DEACF5',
@@ -126,7 +128,7 @@ const colors = {
   },
   scrollbar: {
     hover: 'rgb(153, 149, 149)',
-    pure: 'rgba(233, 228, 228, 0.807)',
+    pure: 'rgb(233, 228, 228)',
   },
   none: {
     0: 'none',
@@ -193,5 +195,58 @@ module.exports = {
   container: {
     center: true,
   },
-  plugins: [],
+  plugins: [
+    plugin(function ({ addUtilities, theme }) {
+      addUtilities({
+        '.scrollbar': {
+          '&::-webkit-scrollbar': {
+            width: theme('spacing.1'),
+            backgroundColor: 'transparent',
+            cursor: theme('cursor.move'),
+          },
+          '&::-webkit-scrollbar:horizontal': {
+            height: theme('spacing.2'),
+            backgroundColor: 'transparent',
+            cursor: theme('cursor.move'),
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'transparent',
+            cursor: theme('cursor.move'),
+          },
+          '&::-webkit-scrollbar-thumb': {
+            minHeight: '30%',
+            borderRadius: theme('borderRadius.2xl'),
+            borderWidth: theme('borderWidth.8'),
+            borderStyle: 'solid',
+            borderColor: 'transparent',
+            cursor: theme('cursor.move'),
+            backgroundColor: theme('backgroundColor.scrollbar.pure'),
+            '&:hover': {
+              backgroundColor: theme('backgroundColor.scrollbar.hover'),
+            },
+          },
+          '&::-webkit-scrollbar-thumb:horizontal': {
+            minWidth: '10%',
+            borderRadius: theme('borderRadius.2xl'),
+            borderWidth: theme('borderWidth.8'),
+            borderStyle: 'solid',
+            borderColor: 'transparent',
+            cursor: theme('cursor.move'),
+            backgroundColor: theme('backgroundColor.scrollbar.pure'),
+            '&:hover': {
+              backgroundColor: theme('backgroundColor.scrollbar.hover'),
+            },
+          },
+          '&::-webkit-scrollbar-corner': {
+            backgroundColor: 'transparent',
+          },
+          '.no-scrollbar': {
+            '&::-webkit-scrollbar': {
+              display: 'none',
+            },
+          },
+        },
+      });
+    }),
+  ],
 };

@@ -33,6 +33,8 @@ export default function CommentCard(props: CommentCardProps) {
   const user = isLoggedIn();
   const isAuthor = user && user.userId === comment.commenter._id;
 
+  console.log('comment::', comment);
+
   const items: MenuProps['items'] = [
     {
       label: 'Edit',
@@ -85,7 +87,12 @@ export default function CommentCard(props: CommentCardProps) {
       <PrimaryCard className='bg-white my-2 [&_.ant-card]:mt-3 shadow-sm border-main-purple'>
         <div className='flex justify-between'>
           <div className='flex items-center gap-2'>
-            <SharedAvatarAuthUser userName={comment.commenter.username} />
+            <SharedAvatarAuthUser
+              avatar={
+                !!_.size(comment.commenter?.avatar) ? comment.commenter?.avatar?.[0]?.avatar?.[0]?.url : undefined
+              }
+              userName={comment.commenter.username}
+            />
             <div className='flex gap-2 items-center'>
               <Typography className='text-base flex items-center font-medium'>#{comment.commenter.username}</Typography>
               <Badge status='default' />
@@ -94,7 +101,7 @@ export default function CommentCard(props: CommentCardProps) {
               </Typography>
               {comment.edited && (
                 <>
-                  <Tooltip title='Đã chỉnh sữa'>
+                  <Tooltip title='Edited'>
                     <Typography className='flex items-center text-xs font-normal text-gray-600'>
                       <EditFilled className='text-gray-400' />
                     </Typography>
@@ -168,7 +175,7 @@ export default function CommentCard(props: CommentCardProps) {
         {/* content */}
         <div className='flex flex-col items-start mt-2 gap-0'>
           <Typography.Paragraph
-            ellipsis={{ rows: 8, expandable: true, symbol: 'xem thêm' }}
+            ellipsis={{ rows: 8, expandable: true, symbol: 'More' }}
             className='text-sm font-normal whitespace-pre-line mb-0'
           >
             {comment.content}

@@ -7,6 +7,8 @@ import PrimaryForm from '../../../components/custom/form/PrimaryForm';
 import SentIcon from '../../../components/custom/icon/SentIcon';
 import PrimaryTextArea from '../../../components/custom/input/PrimaryTextArea';
 import SharedAvatarAuthUser from '../../../components/shared/SharedAvatar';
+import { isLoggedIn } from '../../../helper/authhelper';
+import useUserStore from '../../../state/useUserStore';
 
 interface CommentUpdateEditorProps {
   onSubmit: (values: any) => void;
@@ -16,11 +18,18 @@ interface CommentUpdateEditorProps {
 export default function CommentUpdateEditor({ onSubmit, initialValue }: CommentUpdateEditorProps) {
   const [form] = Form.useForm();
   const [checkValue, setValue] = useState<string>('');
+  const username: string = isLoggedIn().username;
+
+  const { user: UserAuth } = useUserStore();
+
   return (
     <PrimaryCard className='bg-white mt-4'>
       <div className='flex w-full gap-3 justify-center items-center'>
         <div className='flex items-start'>
-          <SharedAvatarAuthUser />
+          <SharedAvatarAuthUser
+            avatar={!!_.size(UserAuth?.avatar) ? UserAuth?.avatar : undefined}
+            userName={username}
+          />
         </div>
         <div className='w-full'>
           <PrimaryForm

@@ -1,7 +1,10 @@
 import { WechatFilled } from '@ant-design/icons';
-import { Divider, Spin } from 'antd';
+import { Spin } from 'antd';
 import Typography from 'antd/es/typography/Typography';
 import _ from 'lodash';
+import { useState } from 'react';
+import PrimaryEmpty from '../../../components/custom/empty/PrimaryEmpty';
+import useConversationStore from '../../../state/useConversationStore';
 import UserConversationEntry from './userConversationEntry';
 
 interface UserMessengerEntriesProps {
@@ -12,39 +15,44 @@ interface UserMessengerEntriesProps {
 }
 
 export default function UserMessengerEntries(props: UserMessengerEntriesProps) {
-  const { loading, conversations, conservant } = props ?? {};
-  return !loading ? (
-    <>
-      {!!_.size(conversations) ? (
-        <div>
-          <div className='flex items-center'>
-            <WechatFilled />
-            <Typography>Your conversations</Typography>
+  const { loading } = props ?? {};
+  const { current, setCurrent } = useConversationStore();
+  return (
+    <Spin className='h-full' spinning={loading}>
+      <div className='h-full'>
+        {!!_.size(props.conversations) ? (
+          <div className='w-auto '>
+            <div className='flex hideHead items-center justify-center h-12 border-b border-main-light border-dashed mb-2'>
+              <WechatFilled className='text-xl' />
+              <Typography className='text-white text-lg font-bold ml-2'>Chat</Typography>
+            </div>
+            <div>
+              {_.map(props.conversations, (conversation) => {
+                return (
+                  <UserConversationEntry
+                    current={current}
+                    setCurrent={setCurrent}
+                    conservant={props.conservant}
+                    conversation={conversation}
+                    key={conversation.recipient.username}
+                    setConservant={props.setConservant}
+                  />
+                );
+              })}
+            </div>
           </div>
-          <Divider />
-          <div>
-            {_.map(conversations, (conversation) => {
-              return (
-                <UserConversationEntry
-                  conservant={conservant}
-                  conversation={conversation}
-                  // key={conversation.recipient.username}
-                  setConservant={props.setConservant}
-                />
-              );
-            })}
+        ) : (
+          <div className='flex flex-col items-center justify-center gap-2 h-full'>
+            <PrimaryEmpty
+              description={
+                <>
+                  <Typography className='text-white'>No Conversations</Typography>
+                </>
+              }
+            />
           </div>
-        </div>
-      ) : (
-        <div className='flex items-center justify-center gap-2 h-full'>
-          <Typography>No Conversations</Typography>
-          <Typography color='text.secondary max-w-[70%]'>
-            Click 'Message' on another user's profile to start a conversation
-          </Typography>
-        </div>
-      )}
-    </>
-  ) : (
-    <Spin className='h-full' spinning={loading}></Spin>
+        )}
+      </div>
+    </Spin>
   );
 }

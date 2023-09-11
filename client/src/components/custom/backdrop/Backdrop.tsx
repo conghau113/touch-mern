@@ -22,7 +22,7 @@ export default function Backdrop() {
     <div className='preloader'>
       <Spin
         className='text-main-purple
-        [&_.ant-spin-dot-item]:bg-main-purple
+        [&_.ant-spin-dot-item]:bg-main-light
         [&_.ant-spin-dot-item]:shadow-xl
         '
         tip='Loading ...'

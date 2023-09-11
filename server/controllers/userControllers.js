@@ -103,6 +103,48 @@ const login = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword, userId } = req.body;
+
+    const user = await User.findOne({ _id: userId });
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: 'Your password is wrong.' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ msg: 'Password must be at least 6 characters long.' });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 12);
+    // user.password = newPasswordHash;
+    await User.findOneAndUpdate({ _id: userId }, { password: newPasswordHash });
+
+    res.json({ msg: 'Password updated successfully.' });
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
+const forgotPassword = async (req, res) => {
+  try {
+    const { newPassword, email } = req.body;
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ msg: 'Password must be at least 6 characters long.' });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 12);
+    // user.password = newPasswordHash;
+    await User.findOneAndUpdate({ email }, { password: newPasswordHash });
+
+    res.json({ msg: 'Password updated successfully.' });
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
+
 const updateUser = async (req, res) => {
   try {
     const { userId, biography, fullName, location, occupation, username } = req.body;
@@ -112,19 +154,15 @@ const updateUser = async (req, res) => {
     if (!user) {
       throw new Error('User does not exist');
     }
-    console.log('req.body::', req.body);
-    if (avatar) {
+    if (avatar.avatar.length > 0) {
       user.avatar = avatar;
     } else {
-      if (typeof biography == 'string') {
-        user.biography = biography;
-      }
+      user.biography = biography;
       user.fullName = fullName;
       user.location = location;
       user.occupation = occupation;
-      user.username = username;
+      // user.username = username;
     }
-
     await user.save();
 
     return res.status(200).json({ success: true });
@@ -133,45 +171,90 @@ const updateUser = async (req, res) => {
   }
 };
 
+// const follow = async (req, res) => {
+//   try {
+//     const followingId = req.params.id;
+//     const { userId } = req.body;
+//     // console.log('followingId', followingId);
+//     // console.log('userId', userId);
+
+//     const existingFollow = await Follow.find({ userId, followingId });
+
+//     if (existingFollow) {
+//       throw new Error('Already following this user');
+//     }
+
+//     const follow = await Follow.create({ userId, followingId });
+
+//     return res.status(200).json({ data: follow });
+//   } catch (err) {
+//     return res.status(400).json({ error: err.message });
+//   }
+// };
+
 const follow = async (req, res) => {
+  console.log('req:', req.body);
   try {
-    const followingId = req.params.id;
-    const { userId } = req.body;
-    console.log('followingId', followingId);
-    console.log('userId', userId);
+    const user = await User.find({
+      _id: req.params.id,
+      followers: req.body.userId,
+    });
+    if (user.length > 0) return res.status(500).json({ msg: 'You are already following this user.' });
 
-    const existingFollow = await Follow.find({ userId, followingId });
+    const newUser = await User.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        $push: {
+          followers: req.body.userId,
+        },
+      },
+      { new: true }
+    ).populate('followers following', '-password');
 
-    if (existingFollow) {
-      throw new Error('Already following this user');
-    }
+    await User.findOneAndUpdate({ _id: req.body.userId }, { $push: { following: req.params.id } }, { new: true });
 
-    const follow = await Follow.create({ userId, followingId });
-
-    return res.status(200).json({ data: follow });
+    res.json({ newUser });
   } catch (err) {
-    return res.status(400).json({ error: err.message });
+    return res.status(500).json({ msg: err.message });
   }
 };
 
 const unfollow = async (req, res) => {
   try {
-    const followingId = req.params.id;
-    const { userId } = req.body;
+    const newUser = await User.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        $pull: { followers: req.body.userId },
+      },
+      { new: true }
+    ).populate('followers following', '-password');
 
-    const existingFollow = await Follow.find({ userId, followingId });
+    await User.findOneAndUpdate({ _id: req.body.userId }, { $pull: { following: req.params.id } }, { new: true });
 
-    if (!existingFollow) {
-      throw new Error('Not already following user');
-    }
-
-    await existingFollow.remove();
-
-    return res.status(200).json({ data: existingFollow });
+    res.json({ newUser });
   } catch (err) {
-    return res.status(400).json({ error: err.message });
+    return res.status(500).json({ msg: err.message });
   }
 };
+
+// const unfollow = async (req, res) => {
+//   try {
+//     const followingId = req.params.id;
+//     const { userId } = req.body;
+
+//     const existingFollow = await Follow.find({ userId, followingId });
+
+//     if (!existingFollow) {
+//       throw new Error('Not already following user');
+//     }
+
+//     await existingFollow.remove();
+
+//     return res.status(200).json({ data: existingFollow });
+//   } catch (err) {
+//     return res.status(400).json({ error: err.message });
+//   }
+// };
 
 const getFollowers = async (req, res) => {
   try {
@@ -230,6 +313,34 @@ const getUser = async (req, res) => {
   }
 };
 
+const searchUser = async (req, res) => {
+  try {
+    const users = await User.find({
+      username: { $regex: req.query.username },
+    })
+      .limit(10)
+      .select('fullName username avatar');
+
+    res.json({ users });
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
+
+const getAllUser = async (req, res) => {
+  try {
+    const user = await User.find().select('-password');
+    console.log('useruser::', user);
+
+    if (!user) {
+      throw new Error('Post does not exist');
+    }
+    return res.status(200).json(user);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+};
+
 const getRandomUsers = async (req, res) => {
   try {
     let { size } = req.query;
@@ -270,11 +381,15 @@ const getRandomIndices = (size, sourceSize) => {
 module.exports = {
   register,
   login,
+  changePassword,
+  forgotPassword,
   follow,
   unfollow,
   getFollowers,
   getFollowing,
   getUser,
+  getAllUser,
+  searchUser,
   getRandomUsers,
   updateUser,
 };

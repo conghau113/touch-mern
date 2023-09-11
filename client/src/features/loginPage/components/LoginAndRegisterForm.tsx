@@ -1,22 +1,31 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-import { Col, Divider, Form, Input, message, Row, Typography } from 'antd';
+import { Col, Divider, Form, Input, message, Row, Space, Typography } from 'antd';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, signup } from '../../../apis/service/users';
+import { forgotPassword, login, signup } from '../../../apis/service/users';
 import PrimaryButton from '../../../components/custom/button/PrimaryButton';
 import PrimaryForm from '../../../components/custom/form/PrimaryForm';
 import PrimaryInput from '../../../components/custom/input/PrimaryInput';
+import PrimaryModal from '../../../components/custom/modal/PrimaryModal';
 import { loginUser } from '../../../helper/authhelper';
 import useUserStore from '../../../state/useUserStore';
 import { ELoginEnum } from '../enums/LoginEnum';
+import emailjs from '@emailjs/browser';
+import useBackdropStore from '../../../state/useBackdropStore';
 
 const LoginAndRegisterForm = () => {
   const [form] = Form.useForm();
+  const [forgotPasswordForm] = Form.useForm();
   const [pageType, setPageType] = useState<ELoginEnum>(ELoginEnum.Login);
+  const [isOpenModal, setOpenModal] = useState<boolean>(false);
+  const [isSendMail, setSendMail] = useState<boolean>(false);
+  const [genPass, setGenPass] = useState<string | number>('');
+
   const navigate = useNavigate();
 
   const { setUser } = useUserStore();
+  const { setOpenBackdrop } = useBackdropStore();
 
   const isLogin = _.includes(ELoginEnum.Login, pageType);
   const isRegister = _.includes(ELoginEnum.Register, pageType);
@@ -50,6 +59,62 @@ const LoginAndRegisterForm = () => {
     if (isRegister) handleRegister(values);
   };
 
+  const sendEmail = () => {
+    setOpenBackdrop(true);
+    const newPass = Math.floor(Math.random() * 100000000);
+    emailjs
+      .send(
+        'service_c3wq3vo',
+        'template_5mypcfh',
+        {
+          email: forgotPasswordForm.getFieldValue('confirmEmail'),
+          message: newPass,
+        },
+        'eVUw2oFh3z3NTtm-n'
+      )
+      .then(
+        () => {
+          message.success('Email successfully sent!');
+          setOpenBackdrop(false);
+          setGenPass(newPass);
+          setSendMail(true);
+        },
+        () => {
+          message.error('Failed to send the email, please try again');
+          setOpenBackdrop(false);
+          setSendMail(false);
+        }
+      );
+  };
+
+  const handlSendEmail = async () => {
+    await forgotPasswordForm.validateFields();
+    sendEmail();
+  };
+
+  const handleForgotPassword = async (params: { email: string; newPassword: string | number }) => {
+    await forgotPassword(params);
+    handleLogin({
+      email: params?.email,
+      password: params?.newPassword,
+    });
+    setOpenModal(false);
+  };
+
+  const handlSendEmailConfirm = async () => {
+    await forgotPasswordForm.validateFields();
+    const values = forgotPasswordForm.getFieldsValue();
+    if (genPass === parseInt(values?.confirmPassword)) {
+      const params = {
+        email: values?.confirmEmail,
+        newPassword: values?.confirmPassword,
+      };
+      handleForgotPassword(params);
+    } else {
+      message.error('Password incorrect, please try again!');
+    }
+  };
+
   useEffect(() => {
     if (pageType) {
       form.resetFields();
@@ -66,7 +131,7 @@ const LoginAndRegisterForm = () => {
               {/* first name */}
               <Col span={24}>
                 <Form.Item
-                  label='Họ và tên'
+                  label='Full name'
                   required
                   name='fullName'
                   className='mb-0'
@@ -74,27 +139,29 @@ const LoginAndRegisterForm = () => {
                     {
                       validator: async (__, value) => {
                         if (!value) {
-                          return await Promise.reject(new Error('vui lòng nhập họ và tên của bạn'));
+                          return await Promise.reject(new Error('Please enter your full name'));
                         }
                         if (_.size(value) >= 40) {
-                          return await Promise.reject(new Error('họ và tên không được dài quá 40 kí tự!'));
+                          return await Promise.reject(
+                            new Error('First and last name must not be longer than 40 characters!')
+                          );
                         }
                         if (_.size(value) < 6) {
-                          return await Promise.reject(new Error('họ và tên phải tối thiểu 6 kí tự!'));
+                          return await Promise.reject(new Error('First and last name must be at least 6 characters!'));
                         }
                         return await Promise.resolve();
                       },
                     },
                   ]}
                 >
-                  <PrimaryInput allowClear placeholder='Nhập họ và tên của bạn' type={'text'} />
+                  <PrimaryInput allowClear placeholder='Enter full name' type={'text'} />
                 </Form.Item>
               </Col>
 
               {/* location */}
               <Col span={24}>
                 <Form.Item
-                  label='Địa chỉ (nơi ở hiện tại)'
+                  label='Address (current residence)'
                   required
                   name='location'
                   className='mb-0'
@@ -102,24 +169,24 @@ const LoginAndRegisterForm = () => {
                     {
                       validator: async (__, value) => {
                         if (!value) {
-                          return await Promise.reject(new Error('Vui lòng nhập địa chỉ của bạn!'));
+                          return await Promise.reject(new Error('Please enter your address!'));
                         }
                         if (_.size(value) >= 200) {
-                          return await Promise.reject(new Error('Địa chỉ không được dài quá 200 kí tự!'));
+                          return await Promise.reject(new Error('The address cannot be longer than 200 characters!'));
                         }
                         return await Promise.resolve();
                       },
                     },
                   ]}
                 >
-                  <PrimaryInput allowClear placeholder='Nhập địa chỉ của bạn' type={'text'} />
+                  <PrimaryInput allowClear placeholder='Enter your address' type={'text'} />
                 </Form.Item>
               </Col>
 
               {/* occupation */}
               <Col span={24}>
                 <Form.Item
-                  label='Nick-Name'
+                  label='Username'
                   required
                   name='username'
                   className='mb-0'
@@ -127,22 +194,22 @@ const LoginAndRegisterForm = () => {
                     {
                       validator: async (__, value) => {
                         if (!value) {
-                          return await Promise.reject(new Error('Vui lòng nick-name của bạn!'));
+                          return await Promise.reject(new Error('Please enter your username!'));
                         }
                         if (_.size(value) >= 200) {
-                          return await Promise.reject(new Error('Nick-name không được dài quá 200 kí tự!'));
+                          return await Promise.reject(new Error('username cannot be longer than 200 characters!'));
                         }
                         return await Promise.resolve();
                       },
                     },
                   ]}
                 >
-                  <PrimaryInput allowClear placeholder='Nhập nick-name của bạn' type={'text'} />
+                  <PrimaryInput allowClear placeholder='Enter your username' type={'text'} />
                 </Form.Item>
               </Col>
               <Col span={24}>
                 <Form.Item
-                  label='Nghề nghiệp'
+                  label='Occupation'
                   required
                   name='occupation'
                   className='mb-0'
@@ -150,68 +217,19 @@ const LoginAndRegisterForm = () => {
                     {
                       validator: async (__, value) => {
                         if (!value) {
-                          return await Promise.reject(new Error('Vui lòng nhập nghề nghiệp của bạn!'));
+                          return await Promise.reject(new Error('Please enter your occupation!'));
                         }
                         if (_.size(value) >= 200) {
-                          return await Promise.reject(new Error('Nghề nghiệp không được dài quá 200 kí tự!'));
+                          return await Promise.reject(new Error('Occupation cannot be longer than 200 characters!'));
                         }
                         return await Promise.resolve();
                       },
                     },
                   ]}
                 >
-                  <PrimaryInput allowClear placeholder='Nhập nghề nghiệp của bạn' type={'text'} />
+                  <PrimaryInput allowClear placeholder='Enter your occupation' type={'text'} />
                 </Form.Item>
               </Col>
-
-              {/* file */}
-              {/* <Col span={24}>
-                <Form.Item
-                  name='picture'
-                  className='mb-0'
-                  rules={[
-                    () => ({
-                      validator: async (__, value) => {
-                        const { file } = value ?? {};
-                        const { size = 0, name } = file ?? {};
-                        const getSizeFile: number = size - 20 * 1024 * 1024;
-
-                        if (!value) {
-                          return Promise.reject('Vui lòng đính kèm file!');
-                        }
-                        if (Number.isInteger(getSizeFile) && getSizeFile > 0) {
-                          return await Promise.reject(new Error('Dung lượng file không được quá 20MB!'));
-                        }
-                        if (name && !isAcceptanceFileQuestion(name)) {
-                          return await Promise.reject(
-                            new Error(
-                              `Đính kèm không hợp lệ. Chỉ chập nhận định dạng ${_.join(['jpg', 'jpeg', 'png'], ', ')}!`
-                            )
-                          );
-                        }
-                        return await Promise.resolve();
-                      },
-                    }),
-                  ]}
-                >
-                  <PrimaryDragger
-                    {...uploadProps}
-                    accept={'.jpg,.jpeg,.png'}
-                    droppedFileName={droppedFileName}
-                    droppedFileSize={droppedFileSize}
-                    onHandleClickRemoveFile={() => {
-                      form.setFieldValue('file', undefined);
-                      setStatus('normal');
-                      setDroppedFileSize('');
-                      setDroppedFileName('');
-                      form.validateFields(['file']);
-                    }}
-                    maxCount={1}
-                    variant={`${status === 'error' ? 'failed' : status === 'done' ? 'success' : 'normal'}`}
-                    className='[&_.ant-upload-list]:hidden'
-                  />
-                </Form.Item>
-              </Col> */}
             </>
           )}
 
@@ -226,16 +244,16 @@ const LoginAndRegisterForm = () => {
                 {
                   validator: async (__, value) => {
                     if (!value) {
-                      return await Promise.reject(new Error('Vui lòng nhập email!'));
+                      return await Promise.reject(new Error('Enter your email!'));
                     } else if (!/\S+@\S+\.\S+/.test(value)) {
-                      return Promise.reject('Vui lòng nhập địa chỉ email hợp lệ!');
+                      return Promise.reject('Please enter a valid email address!');
                     }
                     return await Promise.resolve();
                   },
                 },
               ]}
             >
-              <PrimaryInput allowClear placeholder='Nhập email' type={'email'} />
+              <PrimaryInput allowClear placeholder='Enter email' type={'email'} />
             </Form.Item>
           </Col>
 
@@ -250,13 +268,15 @@ const LoginAndRegisterForm = () => {
                 {
                   validator: async (__, value) => {
                     if (!value) {
-                      return await Promise.reject(new Error('Vui lòng nhập password!'));
+                      return await Promise.reject(new Error('Enter your password!'));
                     }
                     if (_.size(value) > 27) {
-                      return await Promise.reject(new Error('Password chỉ được nhập tối đa 27 kí tự!'));
+                      return await Promise.reject(
+                        new Error('Password can only be entered with a maximum of 27 characters!')
+                      );
                     }
                     if (_.size(value) < 6) {
-                      return await Promise.reject(new Error('Password phải nhập tối thiểu 6 kí tự!'));
+                      return await Promise.reject(new Error('Password must be entered at least 6 characters!'));
                     }
                     return await Promise.resolve();
                   },
@@ -264,7 +284,7 @@ const LoginAndRegisterForm = () => {
               ]}
             >
               <Input.Password
-                placeholder='Nhập password'
+                placeholder='Enter password'
                 type={'password'}
                 allowClear
                 className='py-3'
@@ -284,18 +304,117 @@ const LoginAndRegisterForm = () => {
           </Col>
 
           {/* login or register */}
-          <Col span={24}>
+          <Col span={24} className='flex justify-between'>
             <Typography
               className='text-sm hover:underline cursor-pointer text-purple-950 ml-2'
               onClick={() => setPageType(isLogin ? ELoginEnum.Register : ELoginEnum.Login)}
             >
               {isLogin
-                ? 'Nếu bạn chưa có tài khoản, vui lòng đăng ký ở đây'
-                : 'Nếu bạn đã có tài khoản, vui lòng đăng nhập ở đây'}
+                ? `If you don't have an account yet, please register here`
+                : 'If you already have an account, please log in here'}
+            </Typography>
+            <Typography
+              onClick={() => setOpenModal(true)}
+              className='text-sm mr-2.5 text-main-purple hover:underline cursor-pointer'
+            >
+              Forgot password
             </Typography>
           </Col>
         </Row>
       </PrimaryForm>
+      <PrimaryModal
+        variant='default'
+        title='Forgot password'
+        open={isOpenModal}
+        onCancel={() => {
+          setOpenModal(false);
+          setSendMail(false);
+        }}
+        footer={null}
+        centered
+        destroyOnClose
+      >
+        <Divider className='mb-4 bg-main-purple' />
+        <PrimaryForm name='forgot-password-form' layout='vertical' form={forgotPasswordForm} preserve={false}>
+          <Row gutter={[24, 12]}>
+            <Col span={24}>
+              <Form.Item
+                required
+                className='mb-0'
+                label='Email'
+                name={'confirmEmail'}
+                rules={[
+                  {
+                    validator: async (__, value) => {
+                      if (!value) {
+                        return await Promise.reject(new Error('Please enter email address!'));
+                      }
+                      if (!/\S+@\S+\.\S+/.test(value)) {
+                        return Promise.reject('Please enter a valid email address!');
+                      }
+                      return await Promise.resolve();
+                    },
+                  },
+                ]}
+              >
+                <PrimaryInput allowClear placeholder='Enter email' type={'email'} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              {isSendMail && (
+                <Form.Item
+                  className='mb-0'
+                  required
+                  label='Password'
+                  name={'confirmPassword'}
+                  rules={[
+                    {
+                      validator: async (__, value) => {
+                        if (!value) {
+                          return await Promise.reject(new Error('Please enter password!'));
+                        }
+                        if (_.size(value) > 27) {
+                          return await Promise.reject(
+                            new Error('Password can only be entered with a maximum of 27 characters!')
+                          );
+                        }
+                        if (_.size(value) < 6) {
+                          return await Promise.reject(new Error('Password must be entered at least 6 characters!'));
+                        }
+                        return await Promise.resolve();
+                      },
+                    },
+                  ]}
+                >
+                  <Input.Password
+                    placeholder='Enter password'
+                    type={'password'}
+                    allowClear
+                    className='py-3'
+                    iconRender={(visible: any) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+                  />
+                </Form.Item>
+              )}
+            </Col>
+            <Col span={18}>
+              <Typography className='text-xs italic'>*Please, check your email and confirm new password!</Typography>
+            </Col>
+            {isSendMail ? (
+              <Col span={6} className='flex justify-end'>
+                <PrimaryButton onClick={handlSendEmailConfirm} className='h-12' variant='primary'>
+                  Confirm
+                </PrimaryButton>
+              </Col>
+            ) : (
+              <Col span={6} className='flex justify-end'>
+                <PrimaryButton onClick={handlSendEmail} className='h-12' variant='primary'>
+                  Send
+                </PrimaryButton>
+              </Col>
+            )}
+          </Row>
+        </PrimaryForm>
+      </PrimaryModal>
     </div>
   );
 };

@@ -24,7 +24,7 @@ export default function MyPostWidget(props: MyPostWidgetProps) {
         <PrimaryInput
           readOnly
           className='h-11 rounded-full border-dashed border-main-purple'
-          placeholder='Bạn đang nghĩ gì?'
+          placeholder='What are you thinking!'
         />
       </div>
       <div className='flex justify-end items-center w-full mt-2 gap-3'>

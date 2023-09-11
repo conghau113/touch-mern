@@ -1,13 +1,11 @@
-import { Col, FloatButton, message, Row, Spin, Typography, UploadFile } from 'antd';
-import { RcFile } from 'antd/es/upload';
+import { Col, FloatButton, message, Row, Spin, Typography } from 'antd';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useSearchParams } from 'react-router-dom';
 import { createPost, deletePost, getPosts, getUserLikedPosts, updatePost } from '../../apis/service/posts';
-import { getUser } from '../../apis/service/users';
 import Backdrop from '../../components/custom/backdrop/Backdrop';
-import PrimaryCard from '../../components/custom/card/PrimaryCard';
+import PrimaryEmpty from '../../components/custom/empty/PrimaryEmpty';
 import PrimaryStaticModal from '../../components/custom/modal/PrimaryStaticModal';
 import SharedFindUsers from '../../components/shared/SharedFindUsers';
 import SharedPostCard from '../../components/shared/SharedPostCard';
@@ -18,10 +16,12 @@ import { EContentType } from '../../enums/EContentType';
 import { EPostModal } from '../../enums/EPostModal';
 import { isLoggedIn } from '../../helper/authhelper';
 import useBackdropStore from '../../state/useBackdropStore';
+import useConversationStore from '../../state/useConversationStore';
 import usePostStore from '../../state/usePostStore';
 import useSelectedTypePostStore from '../../state/useSelectedTypePostStore';
-import useUserStore from '../../state/useUserStore';
-import { getBase64 } from '../../utils/fileUtil';
+import useTrendingPostStore from '../../state/useTrendingPostStore';
+import ChatBoxContent from '../chatBox/chatBoxContent';
+import useChatBoxStore from '../chatBox/store/useChatBoxStore';
 import Navbar from '../navbar';
 import MyPostWidget from './components/MyPostWidget';
 
@@ -35,11 +35,11 @@ interface HomePageProps {
 
 const HomePage = (props: HomePageProps) => {
   const { propfile, isCreatePost } = props;
-  const { isOpenPostModal, setOpenPostModal, modePostModal, postValues } = usePostStore();
+  const { isOpenPostModal, setOpenPostModal, modePostModal, setPostValues, postValues } = usePostStore();
   const user = isLoggedIn();
   const username = user && isLoggedIn()?.username;
   const isUserAuth = _.includes(propfile?.user?.username, username);
-  const { setOpenBackdrop } = useBackdropStore();
+  const { setOpenBackdrop, isOpenBackdrop } = useBackdropStore();
 
   const [page, setPage] = useState<number>(0);
   const [end, setEnd] = useState<boolean>(false);
@@ -53,6 +53,9 @@ const HomePage = (props: HomePageProps) => {
   const searchExists = search && search.get('search') && _.size(search.get('search')) > 0;
 
   const { selectedPostValue } = useSelectedTypePostStore();
+  const { setEdit } = useTrendingPostStore();
+  const { setOpenConversation, setOpenListUser } = useChatBoxStore();
+  const { setCurrent } = useConversationStore();
 
   const contentTypeSorts = {
     posts: {
@@ -136,11 +139,13 @@ const HomePage = (props: HomePageProps) => {
           return post;
         });
         setPosts(newPost);
+        setEdit(true);
         message.success('Update post successful!');
       }
       setOpenPostModal(false);
       setEffect(!effect);
     }
+    setPostValues({});
     setOpenBackdrop(false);
   };
 
@@ -165,6 +170,12 @@ const HomePage = (props: HomePageProps) => {
     setEnd(false);
     setEffect(!effect);
   }, [search, selectedPostValue, propfile]);
+
+  useEffect(() => {
+    setOpenListUser(false);
+    setOpenConversation(false);
+    setCurrent('');
+  }, []);
 
   return (
     <>
@@ -199,18 +210,25 @@ const HomePage = (props: HomePageProps) => {
                 </div>
               )}
               <Row gutter={[12, 16]} className='mt-4'>
-                {_.map(posts, (post, index) => {
-                  return (
-                    <Col span={24} key={index}>
-                      <SharedPostCard
-                        fetchPost={fetchPosts}
-                        post={post}
-                        postId={post._id}
-                        onDeleteCard={handleDelecard}
-                      />
-                    </Col>
-                  );
-                })}
+                {!!_.size(posts)
+                  ? _.map(posts, (post, index) => {
+                      return (
+                        <Col span={24} key={index}>
+                          <SharedPostCard
+                            fetchPost={fetchPosts}
+                            post={post}
+                            postId={post._id}
+                            onDeleteCard={handleDelecard}
+                          />
+                        </Col>
+                      );
+                    })
+                  : !isOpenBackdrop &&
+                    !_.size(posts) && (
+                      <div className='w-full bg-white rounded-md'>
+                        <PrimaryEmpty />
+                      </div>
+                    )}
               </Row>
               {loading && (
                 <div className='mt-2 flex justify-center'>
@@ -219,7 +237,7 @@ const HomePage = (props: HomePageProps) => {
               )}
               {!loading && _.size(posts) > 0 && <div ref={ref} />}
 
-              {end && (
+              {end && !!_.size(posts) && (
                 <Typography className='text-center mt-2 text-main-purple'>All posts have been viewed!</Typography>
               )}
             </Col>
@@ -237,6 +255,7 @@ const HomePage = (props: HomePageProps) => {
         onSubmit={handelSubmitPostModal}
       />
       <PrimaryStaticModal />
+      {!propfile && <ChatBoxContent />}
       <Backdrop />
       <FloatButton.BackTop />
     </>

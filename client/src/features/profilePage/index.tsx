@@ -8,10 +8,14 @@ import Backdrop from '../../components/custom/backdrop/Backdrop';
 import PrimaryCard from '../../components/custom/card/PrimaryCard';
 import PrimaryStaticModal from '../../components/custom/modal/PrimaryStaticModal';
 import SharedFindUsers from '../../components/shared/SharedFindUsers';
+import SharedFollowTab from '../../components/shared/SharedFollowTab';
 import { EContentType } from '../../enums/EContentType';
 import { isLoggedIn } from '../../helper/authhelper';
 import useBackdropStore from '../../state/useBackdropStore';
+import useConversationStore from '../../state/useConversationStore';
 import useUserStore from '../../state/useUserStore';
+import ChatBoxContent from '../chatBox/chatBoxContent';
+import useChatBoxStore from '../chatBox/store/useChatBoxStore';
 import HomePage from '../homePage';
 import Navbar from '../navbar';
 import ProfileContent from './components/ProfileContent';
@@ -24,12 +28,15 @@ const ProfilePage = () => {
   const [editing, setEditing] = useState<boolean>(false);
   const [tab, setTab] = useState<EProfile>(EProfile.Posts);
   const user = isLoggedIn();
+  const isAuth = _.includes(isLoggedIn().username, profile?.user?.username);
   const params: any = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { setOpenBackdrop } = useBackdropStore();
   const { setOpen } = UpdateProfileModalStore();
   const { setUser } = useUserStore();
+  const { setOpenConversation, setOpenListUser } = useChatBoxStore();
+  const { setCurrent } = useConversationStore();
 
   const fetchUser = async () => {
     setOpenBackdrop(true);
@@ -48,6 +55,7 @@ const ProfilePage = () => {
     await updateUser(user, { ...values });
     setProfile({ ...profile, user: { ...profile.user, ...values } });
     setOpen(false);
+    fetchUser();
   };
 
   const items: MenuProps['items'] = [
@@ -78,10 +86,16 @@ const ProfilePage = () => {
   }, [location, params]);
 
   useEffect(() => {
-    if (profile) {
+    if (_.includes(user?.username, params?.id)) {
       setUser({ avatar: profile?.user?.avatar?.[0]?.avatar?.[0]?.url });
     }
   }, [profile]);
+
+  useEffect(() => {
+    setOpenListUser(false);
+    setOpenConversation(false);
+    setCurrent('');
+  }, []);
 
   return (
     <>
@@ -128,11 +142,12 @@ const ProfilePage = () => {
               </PrimaryCard>
             </Col>
             <Col span={6}>
-              <SharedFindUsers />
+              {isAuth ? <SharedFollowTab fetchUserList={fetchUser} user={profile?.user} /> : <SharedFindUsers />}
             </Col>
           </Row>
         </Col>
       </Row>
+      <ChatBoxContent />
       <PrimaryStaticModal />
       <Backdrop />
       <FloatButton.BackTop />

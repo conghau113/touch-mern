@@ -151,13 +151,18 @@ const enrichWithUserLikePreview = async (posts) => {
   })
     .limit(200)
     .populate('userId', 'username');
+  console.log('postLikes::', postLikes);
 
   postLikes.forEach((postLike) => {
     const post = postMap[postLike.postId];
     if (!post.userLikePreview) {
       post.userLikePreview = [];
     }
-    post.userLikePreview.push(postLike.userId);
+    post.userLikePreview.push({
+      _id: postLike.userId._id,
+      username: postLike.userId.username,
+      avatar: postLike.avatar,
+    });
   });
 };
 
@@ -176,7 +181,6 @@ const getUserLikedPosts = async (req, res) => {
       .lean();
 
     posts = paginate(posts, 10, page);
-
     const count = posts.length;
 
     let responsePosts = [];
@@ -245,6 +249,7 @@ const likePost = async (req, res) => {
     }
 
     const existingPostLike = await PostLike.findOne({ postId, userId });
+    const userLikes = await User.findById(userId);
 
     if (existingPostLike) {
       throw new Error('Post is already liked');
@@ -253,6 +258,7 @@ const likePost = async (req, res) => {
     await PostLike.create({
       postId,
       userId,
+      avatar: userLikes.avatar,
     });
 
     post.likeCount = (await PostLike.find({ postId })).length;
@@ -315,9 +321,11 @@ const getUserLikes = async (req, res) => {
     if (hasMorePages) postLikes.pop();
 
     const userLikes = postLikes.map((like) => {
+      console.log('like::', like);
       return {
         id: like._id,
         username: like.userId.username,
+        avatar: like.avatar,
       };
     });
 

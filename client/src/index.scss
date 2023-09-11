@@ -65,16 +65,18 @@
   }
 
   body {
-    @apply font-inter bg-[#F5F5F5];
+    // @apply font-inter bg-[#F5F5F5];
+    @apply font-inter scroll-smooth scrollbar bg-[#e6e6fa];
   }
 }
 
-* {
-  @apply font-inter;
+*,
+body {
+  font-family: 'Roboto', sans-serif;
 }
 
 // body {
-//   background-image: url('./assets/wallpaper-background.jpg');
+//   background-image: url('./assets/2328117.jpg');
 //   object-fit: cover;
 //   background-size: cover;
 // }

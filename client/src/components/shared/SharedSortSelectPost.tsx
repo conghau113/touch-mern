@@ -1,4 +1,4 @@
-import { HolderOutlined } from '@ant-design/icons';
+import { FunnelPlotFilled, HolderOutlined } from '@ant-design/icons';
 import { Divider, Typography } from 'antd';
 import _ from 'lodash';
 import { useState } from 'react';
@@ -30,7 +30,7 @@ export default function SharedSortSelectPost(props: SortBySelectProps) {
   return (
     <>
       <PrimaryCard className='bg-main-purple'>
-        <Typography className='text-lg gap-2 text-white mb-2 font-medium flex items-center'>Sorted by:</Typography>
+        <Typography className='text-lg gap-2 text-white mb-2 font-medium flex items-center'><FunnelPlotFilled />SORTED BY</Typography>
         <Divider className='my-2 bg-white' />
         <PrimarySelect
           onChange={(e) => handleChange(e)}

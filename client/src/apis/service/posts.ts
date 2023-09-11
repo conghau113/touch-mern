@@ -87,8 +87,19 @@ const updatePost = async (postId: string, user: { token: any }, data: any) => {
   let media: { public_id: any; url: any }[] = [];
   try {
     const { image, content, title } = data ?? {};
-    if (!!_.size(image?.fileList)) {
-      media = await imageUpload(image?.fileList);
+    console.log('checkkkkkkkkkk::', !!_.size(image?.fileList), !!_.size(image));
+    if (!!_.size(image?.fileList) || !!_.size(image)) {
+      if (!!_.size(image?.fileList) && !!_.size(image)) {
+        media = await imageUpload(image?.fileList);
+      }
+      if (!!_.size(image) && !_.size(image?.fileList)) {
+        media = [
+          {
+            public_id: Date.now(),
+            url: image?.[0]?.url,
+          },
+        ];
+      }
     }
     const res = await fetch(BASE_URL + 'api/posts/' + postId, {
       method: 'PATCH',

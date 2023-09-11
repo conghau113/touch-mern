@@ -11,6 +11,7 @@ import PrimaryTextArea from '../../../components/custom/input/PrimaryTextArea';
 import SharedAvatarAuthUser from '../../../components/shared/SharedAvatar';
 import { isLoggedIn } from '../../../helper/authhelper';
 import useBackdropStore from '../../../state/useBackdropStore';
+import useUserStore from '../../../state/useUserStore';
 
 interface CommenteditorProps {
   addComment: (values: any) => void;
@@ -22,8 +23,11 @@ interface CommenteditorProps {
 export default function Commenteditor({ addComment, fetchPost, setReplying, comment }: CommenteditorProps) {
   const [form] = Form.useForm();
   const params: any = useParams();
+  const user = isLoggedIn();
+  const username: string = user && isLoggedIn().username;
   const { setOpenBackdrop } = useBackdropStore();
   const [checkValue, setValue] = useState<string>('');
+  const { user: UserAuth } = useUserStore();
 
   const onSubmit = async (values: any) => {
     const body = {
@@ -45,7 +49,10 @@ export default function Commenteditor({ addComment, fetchPost, setReplying, comm
       <PrimaryCard className='bg-white mt-4 border-main-purple'>
         <div className='flex w-full gap-3 justify-center items-center'>
           <div className='flex items-start'>
-            <SharedAvatarAuthUser />
+            <SharedAvatarAuthUser
+              avatar={!!_.size(UserAuth?.avatar) ? UserAuth?.avatar : undefined}
+              userName={username}
+            />
           </div>
           <div className='w-full'>
             <PrimaryForm
@@ -72,7 +79,7 @@ export default function Commenteditor({ addComment, fetchPost, setReplying, comm
                 <PrimaryTextArea
                   className='w-full '
                   autoSize={{ minRows: 2, maxRows: 6 }}
-                  placeholder='Nhập comment...'
+                  placeholder='Enter comment...'
                   autoFocus
                   onChange={(e) => setValue(e.target.value)}
                   onKeyDown={(event) => {
